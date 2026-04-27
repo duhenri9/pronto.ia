@@ -8,46 +8,60 @@ datasource db {
 }
 
 // ============================================
-// PRONTO.IA — Core Domain Schema
+// PRONTO.IA — Full Domain Schema
 // WhatsApp-first AI training platform for MEIs
 // ============================================
 
-/// Administrators of the platform
+// ─── Core User ───
+
 model User {
   id           String   @id @default(cuid())
-  email        String   @unique
+  email        String?  @unique   // Optional — phone is primary
+  phone        String   @unique   // WhatsApp number (primary identifier)
   name         String
-  phone        String?  @unique  // WhatsApp number
   passwordHash String
   role         UserRole @default(STUDENT)
   avatarUrl    String?
 
-  // Vertical the user belongs to (salão, food, prestadores)
+  // Vertical the user belongs to
   vertical     Vertical?
 
   // Business info for MEIs
   businessName String?
-  businessType String?  // e.g. "manicure", "restaurante", "eletricista"
+  businessType String?   // e.g. "manicure", "restaurante", "eletricista"
   city         String?
   state        String?
 
   // Preferences
-  preferredTime String?  // "manhã", "tarde", "noite"
-  whatsappId    String?  // WhatsApp Business API contact ID
+  preferredTime  String?  // "manhã", "tarde", "noite"
+
+  // Onboarding
+  onboardingCompletedAt DateTime?
+  onboardingStep        Int?
+  onboardingData        Json     @default("{}")
+
+  // Pro subscription
+  isPro           Boolean   @default(false)
+  proExpiresAt    DateTime?
+  stripeCustomerId String?
 
   // Relations
-  enrollments    Enrollment[]
-  certificates   Certificate[]
-  progress       LessonProgress[]
-  dailyCheckins  DailyCheckin[]
-  payments       Payment[]
+  enrollments      Enrollment[]
+  certificates     Certificate[]
+  progress         LessonProgress[]
+  dailyCheckins    DailyCheckin[]
+  payments         Payment[]
+  outcomeReports   OutcomeReport[]
+  auditLogs        AuditLog[]
+  whatsappSession  WhatsAppSession?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([email])
   @@index([phone])
+  @@index([email])
   @@index([vertical])
+  @@index([isPro])
 }
 
 enum UserRole {
@@ -63,20 +77,32 @@ enum Vertical {
   HOME_SERVICE   // prestadores de serviço em casa
 }
 
-/// Learning tracks (trilhas) — one per vertical + level
+// ─── Content Hierarchy: Trilha → Lesson → ContentVersion ───
+
 model Trilha {
   id          String   @id @default(cuid())
-  name        String   // e.g. "IA para Salão — Básico"
   slug        String   @unique
+  name        String   // e.g. "IA para Salão — Básico"
   description String
   vertical    Vertical
   level       TrilhaLevel @default(BASIC)
+
+  // Access control
   isPro       Boolean  @default(false)  // true = R$19-29/mês
+  isPublished Boolean  @default(false)
   order       Int      @default(0)
 
+  // Structure
+  estimatedDays Int    @default(30)
+  totalLessons  Int    @default(0)    // denormalized count
+
   // Persona that delivers this trilha
-  personaName String   @default("Bia")  // Bia for salão, etc
+  personaName String   @default("Bia")
   personaSlug String   @default("bia")
+
+  // Media
+  iconUrl     String?
+  bannerUrl   String?
 
   lessons     Lesson[]
   enrollments Enrollment[]
@@ -86,6 +112,7 @@ model Trilha {
 
   @@index([vertical, level])
   @@index([slug])
+  @@index([isPublished])
 }
 
 enum TrilhaLevel {
@@ -94,42 +121,75 @@ enum TrilhaLevel {
   ADVANCED
 }
 
-/// Individual lessons within a trilha (microlições de 5-7 min)
 model Lesson {
-  id          String   @id @default(cuid())
-  trilhaId    String
-  title       String
-  slug        String
-  description String
-  order       Int      // sequence within trilha
-  durationMin Int      @default(5)  // minutes
+  id        String   @id @default(cuid())
+  trilhaId  String
+  title     String
+  slug      String   @unique
+  dayNumber Int      // maps to daily delivery (1, 2, 3...)
 
-  // Content delivered via WhatsApp
-  whatsappFlow Json?   // WhatsApp Cloud API flow definition
-  audioUrl     String?  // audio message URL
-  textContent  String   // text version of the lesson
-  exercisePrompt String?  // practical exercise instruction
+  // Content — actual content lives in ContentVersion
+  activeVersionId String?
 
-  // Next lesson trigger condition
-  completionType LessonCompletionType @default(CHAT_REPLY)
+  // Delivery config
+  durationMin    Int      @default(5)   // 5-7 min
+  hasExercise    Boolean  @default(true)
+  exercisePrompt String?
 
-  progress    LessonProgress[]
-  trilha      Trilha   @relation(fields: [trilhaId], references: [id], onDelete: Cascade)
+  // Audio (pre-generated TTS or human-recorded)
+  audioUrl         String?
+  audioDurationSec Int?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // Multimedia
+  imageUrl     String?
+  documentUrl  String?
 
-  @@unique([trilhaId, slug])
+  // Ordering & publishing
+  order       Int      @default(0)
+  isPublished Boolean  @default(false)
+
+  // Relations
+  trilha        Trilha           @relation(fields: [trilhaId], references: [id], onDelete: Cascade)
+  versions      ContentVersion[]
+  progress      LessonProgress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([trilhaId, dayNumber])
   @@index([trilhaId, order])
+  @@index([isPublished])
 }
 
-enum LessonCompletionType {
-  CHAT_REPLY     // student replies to Maria/agent
-  EXERCISE_DONE  // student completes practical exercise
-  AUTO_ADVANCE   // auto-advance after reading
+/// Versioned lesson content — enables A/B testing and rollback
+model ContentVersion {
+  id        String   @id @default(cuid())
+  lessonId  String
+  version   Int      @default(1)
+
+  // Lesson content broken into delivery chunks
+  introText    String            // Opening hook (2-3 sentences)
+  bodyText     String            // Main lesson content (WhatsApp-formatted)
+  tipText      String?           // Dica extra (optional bonus tip)
+  closingText  String            // Closing + exercise prompt
+
+  // Persona-specific variants (same lesson, different tone/example)
+  personaVariant String?         // null = generic, "bia", "leo", "tiao"
+
+  // Metadata
+  editedBy   String?             // Admin user ID
+  changeNote String?             // "Fixed typo", "Updated pricing example"
+
+  lesson     Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime @default(now())
+
+  @@unique([lessonId, version, personaVariant])
+  @@index([lessonId])
 }
 
-/// Student enrollment in a trilha
+// ─── Student Progress ───
+
 model Enrollment {
   id        String   @id @default(cuid())
   userId    String
@@ -137,25 +197,36 @@ model Enrollment {
   status    EnrollmentStatus @default(ACTIVE)
   source    EnrollmentSource @default(ORGANIC)
 
+  // Progress tracking
+  currentDay       Int      @default(1)
+  currentLessonId  String?
+  completedLessons Int      @default(0)
+  totalLessons     Int      @default(0)  // Snapshot at enrollment
+
+  // Timestamps
+  enrolledAt     DateTime  @default(now())
+  completedAt    DateTime?
+  lastActivityAt DateTime  @default(now())
+  pausedAt       DateTime?
+
   // Outcome tracking — the core metric
-  reportedRevenueBeforeCents Int?    // revenue before enrollment (cents)
-  reportedRevenueAfterCents  Int?    // revenue after 30/60 days (cents)
+  reportedRevenueBeforeCents Int?
+  reportedRevenueAfterCents  Int?
   reportedOutcomeAt          DateTime?
 
-  startedAt  DateTime @default(now())
-  completedAt DateTime?
-  pausedAt   DateTime?
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trilha   Trilha   @relation(fields: [trilhaId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trilha     Trilha   @relation(fields: [trilhaId], references: [id], onDelete: Cascade)
-
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, trilhaId])
   @@index([userId])
   @@index([trilhaId])
   @@index([status])
+  @@index([lastActivityAt])
 }
 
 enum EnrollmentStatus {
@@ -173,70 +244,304 @@ enum EnrollmentSource {
   REFERRAL
 }
 
-/// Per-lesson progress tracking
+/// Per-lesson progress with full state machine
 model LessonProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  lessonId  String
-  status    ProgressStatus @default(NOT_STARTED)
+  id           String   @id @default(cuid())
+  userId       String
+  lessonId     String
+  enrollmentId String
+  state        LessonState @default(NOT_STARTED)
 
-  // Student's exercise response
-  exerciseResponse String?
+  // Lesson delivery tracking
+  lessonDeliveredAt  DateTime?
+  audioDeliveredAt   DateTime?
 
-  startedAt   DateTime?
-  completedAt DateTime?
+  // Exercise
+  exercisePromptSentAt    DateTime?
+  exerciseResponseText    String?
+  exerciseResponseMediaUrl String?
+  exerciseSubmittedAt     DateTime?
+  exerciseRetries         Int @default(0)
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson  Lesson  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  // Evaluation
+  score          Int?
+  feedbackText   String?
+  evaluatedAt    DateTime?
+
+  // Timing
+  startedAt    DateTime?
+  completedAt  DateTime?
+  timeSpentSec Int?
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson     Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([userId, lessonId])
+  @@unique([enrollmentId, lessonId])
   @@index([userId])
   @@index([lessonId])
+  @@index([state])
 }
 
-enum ProgressStatus {
+/// Full lesson state machine:
+/// NOT_STARTED → IN_PROGRESS → EXERCISE_PENDING → EXERCISE_SUBMITTED
+///   → EVALUATED → COMPLETED (score ≥ 60) or RETRY_EXERCISE (max 3, then auto-pass)
+/// If hasExercise=false: IN_PROGRESS → COMPLETED directly
+enum LessonState {
   NOT_STARTED
   IN_PROGRESS
+  EXERCISE_PENDING
+  EXERCISE_SUBMITTED
+  EVALUATED
   COMPLETED
   SKIPPED
 }
 
-/// Daily check-in from WhatsApp
-model DailyCheckin {
-  id        String   @id @default(cuid())
-  userId    String
-  trilhaId  String
-  lessonId  String?  // lesson delivered that day
-  responded Boolean @default(false)
+// ─── Daily Check-in ───
 
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+model DailyCheckin {
+  id           String   @id @default(cuid())
+  userId       String
+  enrollmentId String
+  dayNumber    Int
+
+  // Check-in data
+  mood        String?   // great, good, neutral, bad
+  reflection  String?   // Free-text reflection on today's lesson
+  actionPlan  String?   // What they'll apply today
+
+  // Revenue micro-tracking
+  dailyRevenueCents Int?
+
+  responded   Boolean  @default(false)
+  checkedInAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
-  @@index([userId, createdAt])
+  @@unique([userId, enrollmentId, dayNumber])
+  @@index([userId])
+  @@index([enrollmentId])
 }
 
-/// Outcome-based certificates — "Ana ganhou +R$1.240 em 60 dias"
-model Certificate {
+// ─── WhatsApp Session & Messages ───
+
+model WhatsAppSession {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  phoneNumber  String   @unique
+
+  // Meta WhatsApp API identifiers
+  waId         String?   // Meta's WhatsApp ID for the contact
+
+  // Session state
+  currentPersona String   @default("maria")  // maria, bia, leo, tiao
+  currentFlow    String?  // onboarding, lesson, exercise, chat, menu
+  flowState      Json     @default("{}")      // Flow-specific state data
+
+  // Context window management
+  lastMessageAt      DateTime?
+  messageCount       Int      @default(0)
+
+  // 24-hour session window tracking (free messages within window)
+  sessionWindowStart DateTime?
+  isInSessionWindow  Boolean  @default(false)
+
+  isActive     Boolean  @default(true)
+
+  // Relations
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages WhatsAppMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phoneNumber])
+  @@index([lastMessageAt])
+}
+
+model WhatsAppMessage {
+  id            String   @id @default(cuid())
+  sessionId     String
+  userId        String
+
+  // Message identifiers
+  waMessageId   String?   // Meta's message ID
+  direction     String   // inbound, outbound
+  messageType   String   // text, audio, image, document, template, interactive
+
+  // Content
+  textContent       String?
+  mediaUrl          String?
+  mediaId           String?   // Meta media ID
+  templateName      String?
+  interactivePayload Json?
+
+  // Context
+  personaUsed   String?   // Which persona generated this
+  lessonId      String?   // If related to a lesson
+  enrollmentId  String?
+
+  // LLM tracking
+  llmCallId     String?   // Link to LLMCall record
+  tokensUsed    Int?
+
+  // Delivery status
+  status        String   @default("pending")  // pending, sent, delivered, read, failed
+  deliveredAt   DateTime?
+  readAt        DateTime?
+
+  session WhatsAppSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([userId])
+  @@index([direction])
+  @@index([createdAt])
+}
+
+// ─── LLM Call Tracking ───
+
+model LLMCall {
   id           String   @id @default(cuid())
   userId       String
-  trilhaId     String
-  code         String   @unique  // verification code
 
-  // Outcome data on the cert
-  outcomeLabel String?  // e.g. "+R$1.240 em 60 dias"
-  issuedAt     DateTime @default(now())
+  // Model info
+  model        String                     // e.g. "openai/gpt-4o-mini"
+  persona      String                     // maria, bia, leo, tiao, evaluator
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Input
+  systemPromptHash String?
+  inputTokens      Int
 
-  @@index([code])
+  // Output
+  outputTokens     Int
+  finishReason     String?
+
+  // Cost (in cents BRL)
+  estimatedCostCents Int
+
+  // Performance
+  latencyMs      Int
+
+  // Context snapshot (for debugging)
+  lessonId       String?
+  sessionId      String?
+
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([persona])
+  @@index([model])
+  @@index([createdAt])
+}
+
+// ─── Exercise Evaluation ───
+
+model ExerciseEvaluation {
+  id              String   @id @default(cuid())
+  lessonProgressId String  @unique
+  userId          String
+  lessonId        String
+
+  // Input
+  studentResponse String
+  evaluationModel String
+
+  // Output
+  score           Int       // 0-100
+  passed          Boolean   // score >= 60
+  feedbackText    String
+  improvementTips String?   // JSON array of tips
+
+  // Criteria breakdown
+  relevanceScore    Int?    // 0-100
+  completenessScore Int?    // 0-100
+  practicalityScore Int?    // 0-100
+
+  // LLM tracking
+  llmCallId          String?
+  tokensUsed         Int
+  estimatedCostCents Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([passed])
+}
+
+// ─── Certificate ───
+
+model Certificate {
+  id            String   @id @default(cuid())
+  userId        String
+  enrollmentId  String   @unique
+  trilhaId      String
+
+  // Certificate content
+  verificationCode String @unique   // 8-char alphanumeric
+  recipientName    String
+  trilhaTitle      String
+
+  // Outcome (the key differentiator — "Ana ganhou +R$1.240 em 60 dias")
+  revenueBeforeCents Int?
+  revenueAfterCents  Int?
+  revenueLiftCents   Int?
+  revenueLiftPercent Int?
+  outcomeHeadline    String?  // "Ana ganhou +R$1.240 em 60 dias"
+
+  // PDF
+  pdfUrl        String?
+
+  issuedAt      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([verificationCode])
   @@index([userId])
 }
 
-/// Payments (B2C Pro + B2B/B2G contracts)
+// ─── Outcome Report ───
+
+model OutcomeReport {
+  id            String   @id @default(cuid())
+  userId        String
+  enrollmentId  String
+
+  // Survey period
+  periodDays    Int      // 30, 60, 90
+
+  // Revenue
+  revenueBeforeCents Int
+  revenueAfterCents  Int
+  revenueLiftCents   Int
+  revenueLiftPercent Float
+
+  // Qualitative
+  topTakeaway     String?
+  wouldRecommend  Boolean  @default(true)
+  testimonialText String?   // Can be used in marketing
+
+  reportedAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, enrollmentId, periodDays])
+  @@index([enrollmentId])
+  @@index([reportedAt])
+}
+
+// ─── Payment ───
+
 model Payment {
   id             String       @id @default(cuid())
   userId         String?
@@ -244,8 +549,14 @@ model Payment {
   status         PaymentStatus @default(PENDING)
   type           PaymentType
   provider       PaymentProvider @default(STRIPE)
-  providerId     String?      // external payment ID
+  providerId     String?
   metadata       Json?
+
+  // Subscription
+  isSubscription Boolean  @default(false)
+  planType       String?  // pro_monthly, pro_annual
+  paidAt         DateTime?
+  expiresAt      DateTime?
 
   user           User?        @relation(fields: [userId], references: [id])
 
@@ -277,18 +588,58 @@ enum PaymentProvider {
   BANK_TRANSFER
 }
 
-/// B2G/B2B partner organizations
+// ─── Processed Events (Webhook Dedup) ───
+
+model ProcessedEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  eventId     String
+  eventType   String
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt])
+}
+
+// ─── Audit Log ───
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  action       String
+  actorId      String
+  actorType    String   // user, system, admin
+  resourceType String
+  resourceId   String
+  details      Json?
+  ipAddress    String?
+
+  user User? @relation(fields: [actorId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([resourceType, resourceId])
+  @@index([createdAt])
+}
+
+// ─── Partner (B2G/B2B) ───
+
 model Partner {
   id          String       @id @default(cuid())
   name        String
   type        PartnerType
+  cnpj        String?      @unique
+  contactName String?
+  contactEmail String?
+  contactPhone String?
+
+  // Contract
   contractValueCents Int?
   contractStart     DateTime?
   contractEnd       DateTime?
-  maxStudents       Int?
+  maxStudents       Int     @default(0)
+  seatsUsed         Int     @default(0)
   verticalFocus     Vertical?
-  contactEmail      String?
-  contactPhone      String?
   isActive    Boolean      @default(true)
 
   createdAt   DateTime     @default(now())
@@ -307,4 +658,41 @@ enum PartnerType {
   SINDICATE
   ASSOCIATION
   ENTERPRISE
+}
+
+// ─── Daily Metric (Analytics Aggregation) ───
+
+model DailyMetric {
+  id                String   @id @default(cuid())
+  date              DateTime
+  vertical          String?
+
+  // Engagement
+  activeUsers       Int @default(0)
+  lessonsCompleted  Int @default(0)
+  exercisesPassed   Int @default(0)
+  exercisesFailed   Int @default(0)
+  dailyCheckins     Int @default(0)
+
+  // Revenue outcomes
+  totalRevenueLiftCents Int @default(0)
+  avgRevenueLiftPercent Float @default(0)
+
+  // Business
+  newEnrollments      Int @default(0)
+  newProSubscriptions Int @default(0)
+
+  // LLM costs
+  llmCostCents    Int @default(0)
+  llmCallsCount   Int @default(0)
+
+  // WhatsApp costs
+  whatsappCostCents    Int @default(0)
+  whatsappMessagesSent Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([date, vertical])
+  @@index([date])
 }
