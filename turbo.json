@@ -1,15 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "lint": {
+      "persistent": true,
       "dependsOn": ["^build"]
     },
     "typecheck": {
@@ -17,7 +15,7 @@
     },
     "test": {},
     "test:unit": {},
-    "test:ci": {
+    "lint": {
       "dependsOn": ["^build"]
     },
     "clean": {
@@ -25,6 +23,10 @@
     },
     "db:generate": {
       "cache": false
+    },
+    "db:push": {
+      "cache": false,
+      "dependsOn": ["^build"]
     },
     "db:migrate": {
       "cache": false
