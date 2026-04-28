@@ -15,6 +15,7 @@ export interface LoadedPrompt {
   vertical: string;
   model: string;
   language: string;
+  fallbackMessage: string;
   systemPrompt: string;
 }
 
@@ -61,6 +62,7 @@ export function loadPrompt(persona: string): LoadedPrompt {
     vertical: meta.vertical ?? 'all',
     model: meta.model ?? 'claude-haiku-4-5-20251001',
     language: meta.language ?? 'pt-BR',
+    fallbackMessage: meta.fallback_message ?? 'Pode repetir, por favor? Deu um pequeno problema técnico aqui.',
     systemPrompt: body,
   };
 

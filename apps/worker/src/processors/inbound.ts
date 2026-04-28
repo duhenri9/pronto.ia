@@ -16,8 +16,7 @@ import {
   enrollments,
   processedEvents,
 } from '@pronto-ia/database';
-import { ProntoLLMClient } from '@pronto-ia/llm';
-import { getLLMClient } from '@pronto-ia/llm';
+import { ProntoLLMClient, getLLMClient, loadPrompt } from '@pronto-ia/llm';
 import type { ChatMessage, LLMCallResult } from '@pronto-ia/llm';
 import { eventBus } from '@pronto-ia/events';
 
@@ -127,11 +126,12 @@ export const inboundWorker = new Worker<InboundJobData>(
       });
     } catch (err) {
       console.error(`[INBOUND] LLM call failed for ${phone}:`, err);
-      // Enqueue fallback outbound message
+      // Enqueue fallback outbound message using persona's fallback_message
+      const fallbackMsg = loadPrompt(persona).fallbackMessage;
       await outboundQueue.add('fallback', {
         userId,
         phone,
-        messageText: 'Ops! Tive um pequeno problema técnico. Pode repetir? 😊',
+        messageText: fallbackMsg,
         messageType: 'text',
         persona,
         sessionId,
