@@ -15,10 +15,10 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 | Anthropic Claude client + guardrails | ✅ Implementado |
 | Persona prompts (Maria, Bia, Léo, Tião, Evaluator) | ✅ Implementado |
 | WhatsApp Cloud API + Z-API client | ✅ Implementado |
-| Auth jose (JWT HS256) | ✅ Implementado (tech debt — ADR pendente) |
+| Auth jose (JWT HS256) | ✅ Implementado (tech debt — ADR-0013) |
 | Event bus tipado | ✅ Implementado |
-| BullMQ worker + Redis queue | ❌ Não implementado |
-| Sentry error tracking | ❌ Não implementado |
+| BullMQ worker + Redis queue | ✅ Implementado (3 processors) |
+| Sentry error tracking | ✅ Implementado |
 | Storybook / Lighthouse CI | 🔜 Fase 2+ |
 | Payments (Abacate Pay + Stripe) | 🔜 Fase 3 |
 
@@ -32,9 +32,10 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 | LLM | **Anthropic Claude** (Haiku 4.5 / Sonnet 4.5) | packages/llm · API key direta |
 | WhatsApp | **Meta Cloud API** (produção) / **Z-API** (pilot) | packages/whatsapp · factory pattern |
 | DB | **PostgreSQL 16** | docker-compose.dev.yml |
-| Queue | **Redis 7** (docker) + **BullMQ** (pendente) | worker hosted on Railway (ADR-0011) |
+| Queue | **Redis 7** + **BullMQ** | apps/worker · hosted on Railway (ADR-0011) |
 | Types | **Zod** + TypeScript strict | packages/types |
 | Events | Typed EventEmitter | packages/events |
+| Monitoring | **Sentry** | apps/web · plan grátis (5k errors/month) |
 
 ## Architecture
 
@@ -62,8 +63,9 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 ```
 apps/
   web/            Next.js 15 (App Router + API Routes)
+  worker/         BullMQ worker (inbound/outbound/scheduled processors)
 packages/
-  database/       Drizzle ORM + schema + migrations
+  database/       Drizzle ORM + schema + migrations + SQL helpers
   auth/           jose JWT (sign/verify) + bcryptjs
   types/          Shared TypeScript types + Zod schemas
   llm/            Anthropic Claude client + guardrails
@@ -71,6 +73,8 @@ packages/
   events/         Typed domain event bus
 prompts/
   personas/       Versioned persona system prompts (YAML frontmatter + MD)
+docs/
+  adr/            Architecture Decision Records
 ```
 
 ## Setup
@@ -100,6 +104,7 @@ pnpm --filter @pronto-ia/web dev
 |---|---|---|
 | 0011 | Worker hosting on Railway | ✅ Aprovado |
 | 0012 | Payments: Abacate Pay + Stripe | ✅ Aprovado (Phase 3) |
+| 0013 | Auth migration: jose → Better Auth | 📋 Proposto (gatilho: 500 users / B2G) |
 
 > ADRs completos em `docs/adr/`.
 
@@ -109,10 +114,10 @@ pnpm --filter @pronto-ia/web dev
 - ✅ Stack migrada (Next.js + Drizzle + Anthropic + jose)
 - ✅ Persona prompts versionados
 - ✅ WhatsApp client factory
-- 🔜 BullMQ worker (Railway)
-- 🔜 Sentry (plan grátis, 1 import + 1 ENV)
-- 🔜 Auth refactor (jose → melhor solução)
-- 🔜 Payments (Abacate Pay + Stripe — Phase 3)
+- ✅ BullMQ worker (3 queues: inbound, outbound, scheduled)
+- ✅ Sentry error tracking
+- 🔜 Auth refactor (jose → Better Auth — ADR-0013)
+- 🔜 Payments (Abacate Pay + Stripe — Phase 3, ADR-0012)
 
 ## Licença
 
