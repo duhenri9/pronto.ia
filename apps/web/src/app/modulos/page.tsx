@@ -4,15 +4,15 @@ import { useState } from 'react';
 import {
   Sparkles, Shield, Briefcase, TrendingUp,
   ArrowRight, MessageCircle, Users,
-  Timer, Star, Globe, Heart, BookOpen, ChevronDown, Rocket
+  Star, Globe, Heart, BookOpen, ChevronDown, Rocket
 } from 'lucide-react';
 import Link from 'next/link';
 
 const HERO_STATS = [
   { icon: BookOpen, value: '4', label: 'Módulos completos' },
-  { icon: Timer, value: '20-30 min', label: 'Por microlição' },
   { icon: Star, value: '100%', label: 'Grátis e vitalício' },
   { icon: Users, value: '+15M', label: 'meis no Brasil' },
+  { icon: Rocket, value: 'No seu ritmo', label: 'Sem pressa' },
 ];
 
 const MODULOS = [
@@ -21,12 +21,11 @@ const MODULOS = [
     icon: Sparkles,
     number: '01',
     title: 'Primeiros passos com IA',
-    duration: '20 minutos',
-    modules: '2 submódulos',
-    description: 'Este módulo é o seu pontapé inicial. Em só 20 minutos, a Maria te mostra que a Inteligência Artificial não é um bicho de sete cabeças. Se você sabe mandar uma mensagem no WhatsApp, você já tem tudo o que precisa para começar.',
+    description: 'Entenda o que é IA de verdade, sem exageros e sem medo.',
     lessons: [
-      'O que é IA de verdade (sem exageros e sem medo)',
-      'Como a IA já está na sua vida, mesmo que você não saiba',
+      'O que é Inteligência Artificial?',
+      'Onde a IA já está na sua vida?',
+      'Primeira conversa prática com a Maria',
     ],
     color: 'green',
   },
@@ -35,13 +34,11 @@ const MODULOS = [
     icon: Shield,
     number: '02',
     title: 'IA no seu dia a dia',
-    duration: '30 minutos',
-    modules: '3 submódulos',
-    description: 'A IA não serve só para o trabalho. Ela pode ser sua aliada para viver com mais segurança e tranquilidade. Segurança e praticidade andam juntas, e a Maria está aqui para te guiar.',
+    description: 'Use IA para se proteger, organizar sua rotina e cuidar da saúde.',
     lessons: [
-      'Como identificar golpes e notícias falsas usando IA',
+      'Como identificar golpes e notícias falsas com IA',
       'Como se proteger online e proteger sua família',
-      'Como usar IA para cuidar melhor da sua saúde e bem-estar',
+      'Como usar IA para cuidar melhor da sua saúde',
     ],
     color: 'yellow',
   },
@@ -50,9 +47,7 @@ const MODULOS = [
     icon: Briefcase,
     number: '03',
     title: 'IA no seu trabalho',
-    duration: '30 minutos',
-    modules: '3 submódulos',
-    description: 'Aqui a coisa fica séria — mas no bom sentido. Este módulo é para você que quer usar a IA para trabalhar melhor, vender mais e se organizar. Se você é MEI, autônomo ou profissional liberal, este módulo foi feito para você.',
+    description: 'Escreva melhor, organize suas contas e crie propostas profissionais.',
     lessons: [
       'Como escrever mensagens e e-mails profissionais em segundos',
       'Como organizar as contas e a administração do seu negócio',
@@ -65,11 +60,9 @@ const MODULOS = [
     icon: TrendingUp,
     number: '04',
     title: 'IA para crescer na carreira',
-    duration: '30 minutos',
-    modules: '3 submódulos',
-    description: 'Seja para conseguir um emprego melhor, mudar de área ou voltar ao mercado de trabalho, a IA pode ser a sua melhor amiga nessa jornada. O futuro não espera — e com a IA, você não precisa esperar também.',
+    description: 'Descubra novas oportunidades, monte um currículo competitivo e prepare-se para entrevistas.',
     lessons: [
-      'Como descobrir novas áreas de atuação com a ajuda da IA',
+      'Como descobrir novas áreas de atuação',
       'Como montar um currículo que se destaca',
       'Como se preparar para entrevistas com confiança',
     ],
@@ -94,7 +87,7 @@ const FAQ = [
   },
   {
     q: '"Quanto tempo eu vou demorar pra aprender?"',
-    a: 'Cada microlição tem entre 20 e 30 minutos. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
+    a: 'Cada módulo tem o tempo que você precisar. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
   },
   {
     q: '"E se eu não gostar?"',
@@ -233,14 +226,10 @@ export default function ModulosPage() {
 
                     {/* Conteúdo */}
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <div className="mb-2">
                         <h3 className="text-2xl font-semibold text-white/90">
                           {modulo.title}
                         </h3>
-                        <span className={`text-xs font-medium px-3 py-1 rounded-full ${c.bg} ${c.border} ${c.text}`}>
-                          {modulo.duration}
-                        </span>
-                        <span className="text-xs text-[#757994]">{modulo.modules}</span>
                       </div>
                       <p className="text-[#9DA1B4] leading-relaxed mb-6">
                         {modulo.description}
@@ -366,7 +355,7 @@ export default function ModulosPage() {
           Pronta pra começar?
         </h2>
         <p className="text-[#9DA1B4] text-lg mb-8 max-w-xl mx-auto">
-          A Maria está te esperando. Escolha um módulo e em 20 minutos você já aprendeu algo novo.
+          A Maria está te esperando. Escolha um módulo e comece a aprender no seu ritmo.
         </p>
         <a
           href="https://wa.me/5511999999999?text=Oi%20Maria%21"
