@@ -23,12 +23,67 @@ const MODULOS = [
     title: 'Primeiros passos com IA',
     subtitle: 'Getting Started with AI',
     duration: '20 minutos',
-    modules: '2 submódulos',
+    modules: '2 blocos',
     description: 'Entenda o que é IA de verdade, sem exageros e sem medo.',
     lessons: [
-      'O que é IA e como ela funciona (sem tecniquês)',
-      'Onde a IA já está na sua vida — exemplos práticos',
-      'Primeira conversa prática com a Maria',
+      'Começando com IA — o que é, onde está, como usar',
+      'Fundamentos de Prompting — como fazer a pergunta certa',
+    ],
+    blocks: [
+      {
+        title: 'Começando com IA',
+        sections: [
+          {
+            title: 'Visão geral do módulo',
+            content: 'Meu bem, seja bem-vindo ao seu primeiro passo no mundo da IA. Este módulo foi feito para você que quer entender de uma vez por todas o que é essa tal de Inteligência Artificial — sem palavras difíceis, sem medo e sem exageros. Em apenas 20 minutos, você vai descobrir que a IA está mais perto de você do que imagina.',
+          },
+          {
+            title: 'Desmistificando a IA',
+            content: 'Vamos separar os fatos da ficção. IA não é robô que vai dominar o mundo. Não é magia. Não é coisa de filme de Hollywood. É uma ferramenta — como uma calculadora, só que para palavras e ideias. Ela aprende com exemplos, do mesmo jeito que você aprendeu a fazer bolo: vendo, tentando e ajustando.',
+          },
+          {
+            title: 'Ferramentas de IA para usar hoje',
+            content: 'Você não precisa instalar nada. Não precisa pagar nada. Vou te apresentar ferramentas gratuitas que você pode começar a usar agora mesmo no seu celular ou computador. A mais importante delas? Eu mesma! A Maria está aqui, no seu WhatsApp, pronta para te ajudar.',
+          },
+          {
+            title: 'Como a IA ajuda no dia a dia',
+            content: 'A IA já está na sua vida — no seu banco, no seu celular, nas sugestões de compras, no GPS que te leva para lugares novos. Nesta seção, vou te mostrar exemplos práticos em compras, saúde e comunicação. Você vai se surpreender com o quanto já usa IA sem saber.',
+          },
+          {
+            title: 'IA na prática',
+            content: 'Hora de colocar a mão na massa. Você vai aplicar IA em uma situação real: imagine que você precisa planejar o cardápio da semana para sua família. Como a IA pode te ajudar? Vamos fazer isso junto, passo a passo.',
+          },
+          {
+            title: 'Resumo do bloco',
+            content: 'Recapitulando: você aprendeu o que é IA de verdade, descobriu que já usa ela no dia a dia e deu seu primeiro passo prático. Agora está pronto para o próximo desafio: aprender a conversar com a IA para tirar o melhor proveito dela.',
+          },
+        ],
+      },
+      {
+        title: 'Fundamentos de Prompting',
+        sections: [
+          {
+            title: 'Visão geral do bloco',
+            content: 'Prompt é o nome chique para "pergunta que você faz para a IA". Parece simples, mas a forma como você pergunta muda completamente a resposta. Neste bloco, você vai aprender a arte de fazer perguntas poderosas.',
+          },
+          {
+            title: 'Respostas melhores com prompts claros',
+            content: 'Os 4 elementos de um bom prompt: clareza, contexto, formato e papel. Exemplo prático: em vez de "me ajuda com marketing", diga "você é uma especialista em marketing para pequenos negócios. Me dá 5 ideias de conteúdo para Instagram para uma doceria caseira." Percebe a diferença? A segunda pergunta é um prato cheio para a IA trabalhar.',
+          },
+          {
+            title: 'Use IA com responsabilidade e segurança',
+            content: 'Meu bem, com grandes poderes vêm grandes responsabilidades. Nunca compartilhe dados pessoais, senhas ou informações bancárias. Revise tudo que a IA gerar antes de usar. E lembre-se: a responsabilidade final é sempre sua. A IA é uma ferramenta, não uma conselheira infalível.',
+          },
+          {
+            title: 'Prompting na prática',
+            content: 'Exercício guiado: você tem um pequeno negócio de salgados. Precisa criar uma mensagem para clientes antigos que não compram há 30 dias. Vamos construir o prompt junto. Depois, você vai adaptar esse mesmo modelo para qualquer situação do seu negócio.',
+          },
+          {
+            title: 'Resumo do módulo',
+            content: 'Você chegou ao fim do Módulo 1. Agora sabe o que é IA, como ela está presente na sua vida e — mais importante — como conversar com ela para obter respostas realmente úteis. O próximo passo? Explorar como a IA pode te ajudar em áreas específicas: segurança, saúde, trabalho e carreira. Nos vemos no Módulo 2!',
+          },
+        ],
+      },
     ],
     color: 'green',
   },
