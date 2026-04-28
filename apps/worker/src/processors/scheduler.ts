@@ -7,10 +7,7 @@
 
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
-import { eq, and, lte } from 'drizzle-orm';
-
-import { db } from '@pronto-ia/database';
-import { scheduledMessages, whatsappSessions } from '@pronto-ia/database';
+import { db, eq, and, lte, scheduledMessages, whatsappSessions } from '@pronto-ia/database';
 import { createWhatsAppProvider } from '@pronto-ia/whatsapp';
 import type { SendMessageResult } from '@pronto-ia/whatsapp';
 
