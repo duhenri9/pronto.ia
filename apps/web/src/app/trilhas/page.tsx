@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   Sparkles, Shield, Briefcase, TrendingUp,
   ArrowRight, MessageCircle, Users,
-  Timer, Star, Globe, Heart, BookOpen, ChevronDown, Rocket
+  Star, Globe, Heart, BookOpen, ChevronDown, Rocket
 } from 'lucide-react';
 import Link from 'next/link';
 import { Nav } from '@/components/Nav';
@@ -12,9 +12,9 @@ import { Footer } from '@/components/Footer';
 
 const HERO_STATS = [
   { icon: BookOpen, value: '6', label: 'Trilhas completas' },
-  { icon: Timer, value: '< 30 min', label: 'Por módulo' },
   { icon: Star, value: '100%', label: 'Grátis e vitalício' },
   { icon: Users, value: '+15M', label: 'MEIs no Brasil' },
+  { icon: Sparkles, value: '30%', label: 'Mais eficiência com IA' },
 ];
 
 const MODULOS = [
@@ -24,8 +24,7 @@ const MODULOS = [
     number: '01',
     title: 'Primeiros passos com IA',
     subtitle: 'Getting Started with AI',
-    duration: '20 minutos',
-    modules: '2 blocos',
+    readingHint: 'Pausa para um café e ler...',
     description: 'Entenda o que é IA de verdade, sem exageros e sem medo.',
     lessons: [
       'Começando com IA — o que é, onde está, como usar',
@@ -95,8 +94,7 @@ const MODULOS = [
     number: '02',
     title: 'IA no seu dia a dia',
     subtitle: 'Everyday AI',
-    duration: '30 minutos',
-    modules: '3 submódulos',
+    readingHint: 'Pausa no Instagram e ler...',
     description: 'Use IA para se proteger de golpes, navegar com segurança online e cuidar da sua saúde.',
     lessons: [
       'Como identificar golpes e notícias falsas com IA',
@@ -111,8 +109,7 @@ const MODULOS = [
     number: '03',
     title: 'IA no seu trabalho',
     subtitle: 'AI in Your Job',
-    duration: '20-30 minutos',
-    modules: '2-3 submódulos',
+    readingHint: 'Pausa no telefone e ler...',
     description: 'Escreva e-mails e mensagens profissionais, organize suas contas e crie propostas que impressionam.',
     lessons: [
       'Como escrever correspondências e e-mails profissionais em segundos',
@@ -127,8 +124,7 @@ const MODULOS = [
     number: '04',
     title: 'IA para crescer na carreira',
     subtitle: 'AI to Support Your Career',
-    duration: '20-30 minutos',
-    modules: '2-3 submódulos',
+    readingHint: 'Pausa no telefone e ler...',
     description: 'Descubra novas áreas de atuação, monte um currículo competitivo e prepare-se para entrevistas.',
     lessons: [
       'Como descobrir novas áreas de atuação',
@@ -152,6 +148,7 @@ const TRILHAS_DETALHADAS = [
     number: '01',
     title: 'O fim do medo',
     subtitle: 'IA como sua nova parceira de trabalho',
+    readingHint: 'Pausa para um café e ler...',
     description: 'Entenda de uma vez que a IA não é coisa de filme nem vai roubar seu lugar. Ela é como uma calculadora: antes a gente fazia conta no papel, hoje usa a máquina. A IA é a mesma coisa para os textos e ideias do seu negócio.',
     blocks: [
       {
@@ -181,6 +178,7 @@ const TRILHAS_DETALHADAS = [
     number: '02',
     title: 'A arte do pedido',
     subtitle: 'Como mandar na IA e ter resultados reais',
+    readingHint: 'Pausa no Instagram e ler...',
     description: 'O segredo não é a ferramenta, é o que você escreve nela. Se você pedir mal, a resposta é ruim. Se você usar a fórmula certa, o resultado é profissional.',
     blocks: [
       {
@@ -208,6 +206,7 @@ const TRILHAS_DETALHADAS = [
     number: '03',
     title: 'Marketing e vendas',
     subtitle: 'Atrair cliente sem gastar com agência',
+    readingHint: 'Pausa no telefone e ler...',
     description: 'Como usar a IA para fazer seu Instagram, Facebook e WhatsApp trabalharem para trazer clientes.',
     blocks: [
       {
@@ -235,6 +234,7 @@ const TRILHAS_DETALHADAS = [
     number: '04',
     title: 'Gestão e dinheiro',
     subtitle: 'Organização sem prejuízo',
+    readingHint: 'Pausa na TV e ler...',
     description: 'Usar a IA para tirar a bagunça da sua frente. Ideal para quem cuida de tudo sozinho e não tem tempo para burocracia.',
     blocks: [
       {
@@ -262,6 +262,7 @@ const TRILHAS_DETALHADAS = [
     number: '05',
     title: 'Atendimento de ouro',
     subtitle: 'Fidelização e pós-venda',
+    readingHint: 'Pausa no intervalo e ler...',
     description: 'O WhatsApp é onde você ganha dinheiro. A IA vai te ajudar a nunca mais deixar um cliente sem resposta ou dar uma resposta mal educada por estar cansado.',
     blocks: [
       {
@@ -291,6 +292,7 @@ const TRILHAS_DETALHADAS = [
     number: '06',
     title: 'O próximo nível',
     subtitle: 'Crescendo o negócio com IA',
+    readingHint: 'Pausa antes de dormir e ler...',
     description: 'A IA abre portas. Aqui a gente olha para o que vem por aí e como você pode ganhar mais usando a tecnologia.',
     blocks: [
       {
@@ -327,7 +329,7 @@ const FAQ = [
   },
   {
     q: '"Quanto tempo eu vou demorar pra aprender?"',
-    a: 'Cada módulo leva menos de 30 minutos. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
+    a: 'Cada trilha é rápida — uma pausa no dia e você já aprendeu algo novo. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
   },
   {
     q: '"E se eu não gostar?"',
@@ -476,11 +478,8 @@ export default function TrilhasPage() {
                         <h3 className="text-2xl font-semibold text-white/90">
                           {modulo.title}
                         </h3>
-                        <span className={`text-xs font-medium px-3 py-1 rounded-full ${c.bg} ${c.border} ${c.text}`}>
-                          {modulo.duration}
-                        </span>
-                        <span className="text-xs text-[#757994]">{modulo.modules}</span>
                       </div>
+                      <p className="text-xs text-[#757994] italic mt-1">{modulo.readingHint}</p>
                       <p className="text-xs text-[#4D5274] mb-2 font-mono">{modulo.subtitle}</p>
                       <p className="text-[#9DA1B4] leading-relaxed mb-6">
                         {modulo.description}
@@ -548,7 +547,8 @@ export default function TrilhasPage() {
                           {trilha.title}
                         </h3>
                       </div>
-                      <p className="text-xs text-[#4D5274] font-mono mb-3">{trilha.subtitle}</p>
+                      <p className="text-xs text-[#4D5274] font-mono mb-1">{trilha.subtitle}</p>
+                      <p className="text-xs text-[#757994] italic mb-3">{trilha.readingHint}</p>
                       <p className="text-[#9DA1B4] leading-relaxed">{trilha.description}</p>
                     </div>
                   </div>
@@ -676,7 +676,7 @@ export default function TrilhasPage() {
           Pronta pra começar?
         </h2>
         <p className="text-[#9DA1B4] text-lg mb-8 max-w-xl mx-auto">
-          A Maria está te esperando. Escolha um módulo — em menos de 30 minutos você já aprendeu algo novo.
+          A Maria está te esperando. Escolha uma trilha — numa pausa no dia você já aprendeu algo novo.
         </p>
         <a
           href="https://wa.me/5511999999999?text=Oi%20Maria%21"
