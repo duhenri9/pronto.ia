@@ -222,12 +222,14 @@ export function DonateSection() {
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-body-s text-[#757994]">R$</span>
                     <input
-                      type="number"
-                      min="5"
-                      max="100000"
-                      step="1"
+                      type="text"
+                      inputMode="decimal"
                       value={customAmount}
-                      onChange={(e) => { setCustomAmount(e.target.value); setSelectedAmount(null); }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                        setCustomAmount(val);
+                        setSelectedAmount(null);
+                      }}
                       placeholder="0,00"
                       className="w-full rounded-lg border border-[#4D5274] bg-[#252B54] pl-11 pr-4 py-3 text-body-s text-white placeholder:text-[#757994] focus:border-[#00D97E] focus:outline-none transition-colors"
                     />
