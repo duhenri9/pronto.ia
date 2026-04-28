@@ -9,9 +9,8 @@ const VERTICALS = [
     name: 'Salão de Beleza & Estética',
     persona: 'Bia',
     icon: Scissors,
-    iconColor: 'text-green-500',
-    borderColor: 'hover:border-green-400/50',
-    bgGlow: 'hover:bg-green-500/[0.04]',
+    accent: 'green' as const,
+    tagline: 'Sua agenda cheia, seu Instagram voando',
     description:
       'Agendamento, marketing no Instagram, precificação de serviços, fidelização de clientes com IA.',
     pain: 'Cliente cancela, agenda vazia, post não sai',
@@ -21,9 +20,8 @@ const VERTICALS = [
     name: 'Food Service Local',
     persona: 'Léo',
     icon: ChefHat,
-    iconColor: 'text-gold-500',
-    borderColor: 'hover:border-gold-400/50',
-    bgGlow: 'hover:bg-gold-500/[0.04]',
+    accent: 'gold' as const,
+    tagline: 'Seu cardápio inteligente, seu delivery sem dono',
     description:
       'Cardápio com IA, delivery sem app, precificação dinâmica, WhatsApp como canal de pedido.',
     pain: 'Custo subiu, cliente some, delivery come margem',
@@ -33,9 +31,8 @@ const VERTICALS = [
     name: 'Prestadores de Serviço',
     persona: 'Tião',
     icon: Wrench,
-    iconColor: 'text-night-600',
-    borderColor: 'hover:border-night-400/50',
-    bgGlow: 'hover:bg-night-500/[0.04]',
+    accent: 'night' as const,
+    tagline: 'Mais serviço, preço justo, cliente que volta',
     description:
       'Orçamento automático, roteamento de visitas, formalização do MEI, captação via Google.',
     pain: 'Falta serviço, orçamento errado, cliente não volta',
@@ -45,22 +42,57 @@ const VERTICALS = [
     name: 'TI & Tecnologia',
     persona: 'Zé',
     icon: Laptop,
-    iconColor: 'text-blue-500',
-    borderColor: 'hover:border-blue-400/50',
-    bgGlow: 'hover:bg-blue-500/[0.04]',
+    accent: 'blue' as const,
+    tagline: 'Cobre o valor certo, conquista o cliente certo',
     description:
       'Precificação de hora/projeto, contratos simples, captação no LinkedIn, automação com IA.',
     pain: 'Freela barato, cliente calote, sem contrato',
   },
 ] as const;
 
+const ACCENT_MAP = {
+  green: {
+    icon: 'text-green-500',
+    border: 'hover:border-green-400/40',
+    bg: 'hover:bg-green-500/[0.03]',
+    tag: 'bg-green-400/15 text-green-700',
+    dot: 'bg-green-400',
+    painBg: 'bg-green-50',
+  },
+  gold: {
+    icon: 'text-gold-500',
+    border: 'hover:border-gold-400/40',
+    bg: 'hover:bg-gold-500/[0.03]',
+    tag: 'bg-gold-400/15 text-gold-700',
+    dot: 'bg-gold-400',
+    painBg: 'bg-gold-50',
+  },
+  night: {
+    icon: 'text-night-400',
+    border: 'hover:border-night-400/40',
+    bg: 'hover:bg-night-500/[0.04]',
+    tag: 'bg-night-400/15 text-night-700',
+    dot: 'bg-night-300',
+    painBg: 'bg-neutral-50',
+  },
+  blue: {
+    icon: 'text-blue-500',
+    border: 'hover:border-blue-400/40',
+    bg: 'hover:bg-blue-500/[0.03]',
+    tag: 'bg-blue-400/15 text-blue-700',
+    dot: 'bg-blue-400',
+    painBg: 'bg-blue-50',
+  },
+} as const;
+
 export function VerticalCards() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mt-12 grid gap-6 sm:grid-cols-2">
       {VERTICALS.map((v, i) => {
         const Icon = v.icon;
+        const a = ACCENT_MAP[v.accent];
         const isHovered = hovered === v.slug;
         const isOtherHovered = hovered !== null && hovered !== v.slug;
 
@@ -70,35 +102,50 @@ export function VerticalCards() {
             onMouseEnter={() => setHovered(v.slug)}
             onMouseLeave={() => setHovered(null)}
             className={`
-              group relative rounded-lg border bg-surface p-6
+              group relative flex flex-col rounded-lg border bg-surface p-8
               transition-all duration-fast ease-out
-              ${v.borderColor} ${v.bgGlow}
-              ${isHovered ? 'scale-[1.03] shadow-elev-3' : 'shadow-none'}
-              ${isOtherHovered ? 'opacity-60' : 'opacity-100'}
+              ${a.border} ${a.bg}
+              ${isHovered ? 'scale-[1.02] shadow-elev-2' : 'shadow-elev-1'}
+              ${isOtherHovered ? 'opacity-55' : 'opacity-100'}
             `}
             style={{
-              animation: `cardIn 500ms ${i * 100}ms both cubic-bezier(0.22, 1, 0.36, 1)`,
+              animation: `cardIn 500ms ${i * 80}ms both cubic-bezier(0.22, 1, 0.36, 1)`,
             }}
           >
-            {/* Icon */}
-            <div className={`text-heading-l ${v.iconColor}`}>
-              <Icon size={28} strokeWidth={1.5} />
+            {/* Top row: icon + persona tag */}
+            <div className="flex items-center justify-between">
+              <div className={`text-heading-l ${a.icon}`}>
+                <Icon size={24} strokeWidth={1.5} />
+              </div>
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-micro font-medium ${a.tag}`}>
+                <span className={`inline-block h-1.5 w-1.5 rounded-full ${a.dot}`} />
+                {v.persona}
+              </span>
             </div>
 
-            <h3 className="mt-3 text-heading-s font-medium text-neutral-900">
+            {/* Title + tagline */}
+            <h3 className="mt-4 text-heading-m text-neutral-900">
               {v.name}
             </h3>
-            <p className="mt-1 font-mono text-micro uppercase tracking-micro text-green-600">
-              especialista: {v.persona}
+            <p className="mt-1 font-serif text-body-s italic text-text-secondary">
+              {v.tagline}
             </p>
-            <p className="mt-3 text-body-s text-text-secondary leading-relaxed">
+
+            {/* Description */}
+            <p className="mt-4 text-body-s text-text-secondary leading-relaxed">
               {v.description}
             </p>
-            <div className="mt-4 rounded-md bg-sunken px-3 py-2">
-              <p className="font-mono text-micro uppercase tracking-micro text-text-tertiary">
-                dor que resolve
-              </p>
-              <p className="mt-1 text-body-s text-neutral-900">{v.pain}</p>
+
+            {/* Pain callout */}
+            <div className={`mt-auto pt-4`}>
+              <div className={`rounded-md px-3 py-2.5 ${a.painBg}`}>
+                <p className="font-mono text-micro uppercase tracking-micro text-text-tertiary">
+                  dor que resolve
+                </p>
+                <p className="mt-0.5 text-body-s font-medium text-neutral-800">
+                  {v.pain}
+                </p>
+              </div>
             </div>
           </div>
         );

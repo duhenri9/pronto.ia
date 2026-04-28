@@ -103,7 +103,7 @@ export default function HomePage() {
             </h2>
             <p className="mt-4 font-serif text-body-l italic text-text-secondary">
               A Maria te conecta com quem entende o seu ramo. Cada vertical tem
-              uma especialista própria.
+              uma pessoa especialista própria.
             </p>
           </div>
           <VerticalCards />
