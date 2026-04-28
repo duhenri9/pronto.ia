@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Scissors, ChefHat, Wrench } from 'lucide-react';
+import { Scissors, ChefHat, Wrench, Laptop } from 'lucide-react';
 
 const VERTICALS = [
   {
@@ -40,13 +40,25 @@ const VERTICALS = [
       'Orçamento automático, roteamento de visitas, formalização do MEI, captação via Google.',
     pain: 'Falta serviço, orçamento errado, cliente não volta',
   },
+  {
+    slug: 'tech-service',
+    name: 'TI & Tecnologia',
+    persona: 'Zé',
+    icon: Laptop,
+    iconColor: 'text-blue-500',
+    borderColor: 'hover:border-blue-400/50',
+    bgGlow: 'hover:bg-blue-500/[0.04]',
+    description:
+      'Precificação de hora/projeto, contratos simples, captação no LinkedIn, automação com IA.',
+    pain: 'Freela barato, cliente calote, sem contrato',
+  },
 ] as const;
 
 export function VerticalCards() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+    <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       {VERTICALS.map((v, i) => {
         const Icon = v.icon;
         const isHovered = hovered === v.slug;
