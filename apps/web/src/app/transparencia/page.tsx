@@ -50,7 +50,7 @@ export default function TransparenciaPage() {
         <div className="mt-12">
           <h2 className="text-heading-l text-neutral-900">Nossos custos mensais</h2>
           <p className="mt-2 text-body-s text-text-secondary">
-            Projeção para operar com 100 mil pessoas alunas.
+            Projeção para operar com 100 mil pessoas /alun@s.
           </p>
 
           <div className="mt-6 overflow-x-auto">
