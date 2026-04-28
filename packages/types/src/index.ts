@@ -100,6 +100,19 @@ export interface MariaMessage {
   exercisePrompt?: string;
 }
 
+// ---- Donations ----
+export interface DonationRequest {
+  amount: number;
+  method: 'PIX' | 'CREDIT_CARD';
+}
+
+export interface DonationResponse {
+  donationId: string;
+  pixCode?: string;
+  qrCode?: string;
+  status: 'pending' | 'completed' | 'failed';
+}
+
 // ---- Anthropic Claude ----
 export const ANTHROPIC_MODELS = {
   HAIKU: 'claude-haiku-4-5-20251001',
