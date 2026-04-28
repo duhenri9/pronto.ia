@@ -1,6 +1,7 @@
 import { LogoLight } from '@/components/LogoLight';
 import { MariaAvatar } from '@/components/MariaAvatar';
 import { WhatsAppChat } from '@/components/WhatsAppChat';
+import { HowItWorks } from '@/components/HowItWorks';
 import { VerticalCards } from '@/components/VerticalCards';
 import { OutcomeSection } from '@/components/OutcomeSection';
 import { Footer } from '@/components/Footer';
@@ -83,6 +84,9 @@ export default function HomePage() {
         {/* Gradient accent */}
         <div className="pointer-events-none absolute -top-40 right-0 -z-10 h-[500px] w-[500px] rounded-full bg-green-500/5 blur-3xl" />
       </section>
+
+      {/* ── Como funciona? ── */}
+      <HowItWorks />
 
       {/* ── Verticals ── */}
       <section
