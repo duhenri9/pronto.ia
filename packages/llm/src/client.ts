@@ -120,7 +120,7 @@ export class ProntoLLMClient {
       messages: [
         {
           role: 'user',
-          content: `Exercício: ${exercisePrompt}\n\nResposta da aluna: ${studentResponse}`,
+          content: `Exercício: ${exercisePrompt}\n\nResposta da pessoa: ${studentResponse}`,
         },
       ],
       config: evalConfig,

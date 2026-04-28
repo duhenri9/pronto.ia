@@ -44,7 +44,7 @@ describe('loadPrompt — other personas', () => {
     const prompt = loadPrompt('bia');
     expect(prompt.persona).toBe('bia');
     expect(prompt.fallbackMessage).toBe(
-      'Aqui deu uma travada rápida, amiga. Me fala de novo, por favor?',
+      'Aqui deu uma travada rápida, meu bem. Me fala de novo, por favor?',
     );
   });
 
