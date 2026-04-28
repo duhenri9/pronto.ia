@@ -39,6 +39,6 @@ Gratuito — sem cobrança no MVP
 |:---|:---|
 | Infraestrutura (workers, banco, cache, CDN) | R$ 3.000 – 8.000 |
 | Inteligência Artificial | R$ 15.000 – 25.000 |
-| Equipe (3 pessoas) | R$ 35.000 |
+| Equipe (7 pessoas) | R$ 35.000 |
 | Outros (domínio, email, compliance) | R$ 1.500 |
 | **Total** | **R$ 54.500 – 69.500** |

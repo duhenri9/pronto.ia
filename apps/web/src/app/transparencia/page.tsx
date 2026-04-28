@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const COSTS = [
   { component: 'Infraestrutura (workers, banco, cache, CDN)', cost: 'R$ 3.000 – 8.000' },
   { component: 'Inteligência Artificial (LLM)', cost: 'R$ 15.000 – 25.000' },
-  { component: 'Equipe (3 pessoas)', cost: 'R$ 35.000' },
+  { component: 'Equipe (7 pessoas)', cost: 'R$ 35.000' },
   { component: 'Outros (domínio, email, compliance)', cost: 'R$ 1.500' },
 ];
 
