@@ -230,8 +230,8 @@ export function DonateSection() {
                         setCustomAmount(val);
                         setSelectedAmount(null);
                       }}
-                      placeholder="0,00"
-                      className="w-full rounded-lg border border-[#4D5274] bg-[#252B54] pl-11 pr-4 py-3 text-body-s text-white placeholder:text-[#757994] focus:border-[#00D97E] focus:outline-none transition-colors"
+                      placeholder="Digite o valor"
+                      className="w-full rounded-lg border border-[#4D5274] bg-[#252B54] pl-14 pr-4 py-3 text-body-s text-white placeholder:text-[#757994] focus:border-[#00D97E] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
