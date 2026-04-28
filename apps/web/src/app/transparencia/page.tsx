@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
@@ -23,7 +24,8 @@ const MILESTONES = [
 export default function TransparenciaPage() {
   return (
     <div className="min-h-screen bg-canvas text-text-primary">
-      <div className="mx-auto max-w-container px-6 py-20 md:py-24">
+      <Nav />
+      <div className="mx-auto max-w-container px-6 py-20 pt-28 md:py-24">
         {/* Header */}
         <span className="font-mono text-micro font-medium uppercase tracking-micro text-green-600">
           cada real importa
