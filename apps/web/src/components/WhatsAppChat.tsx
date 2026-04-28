@@ -15,7 +15,7 @@ export function WhatsAppChat() {
       {/* Messages — from brand manual scenario 01 */}
       <div className="flex flex-col gap-2">
         <div className="mr-auto max-w-[88%] rounded-xl rounded-bl-sm border border-border-subtle bg-surface px-3 py-2 text-body-s leading-relaxed">
-          Oi! Eu sou a Maria. Antes da gente começar, me conta — como você gosta de ser chamada?
+          Oi! Eu sou a Maria. Antes da gente começar, me conta — como você prefere que eu te chame?
         </div>
         <div className="ml-auto rounded-xl rounded-br-sm bg-green-500 px-3 py-2 text-body-s font-medium text-green-900">
           Ana
