@@ -46,7 +46,27 @@ export const inboundWorker = new Worker<InboundJobData>(
     const userId = session.userId;
     const sessionId = session.id;
 
-    // ---- Step 2: Save inbound message to DB ----
+    // ---- Step 2: Deduplicate by messageId ----
+
+    const existingEvent = await db
+      .select()
+      .from(processedEvents)
+      .where(eq(processedEvents.eventId, messageId))
+      .limit(1);
+
+    if (existingEvent.length > 0) {
+      console.log(`[INBOUND] Duplicate message ${messageId}, skipping`);
+      return;
+    }
+
+    // Mark as processed immediately to prevent concurrent workers from duplicating
+    await db.insert(processedEvents).values({
+      provider: 'whatsapp',
+      eventId: messageId,
+      eventType: 'whatsapp.inbound',
+    });
+
+    // ---- Step 3: Save inbound message to DB ----
 
     await db.insert(whatsappMessages).values({
       sessionId,
@@ -59,7 +79,7 @@ export const inboundWorker = new Worker<InboundJobData>(
       status: 'delivered',
     });
 
-    // ---- Step 3: Resolve persona + enrollment context ----
+    // ---- Step 4: Resolve persona + enrollment context ----
 
     const persona = session.currentPersona;
     let enrollmentId: string | undefined;
