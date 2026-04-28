@@ -42,9 +42,15 @@ export default function TransparenciaPage() {
           <p className="font-mono text-micro uppercase tracking-micro text-text-tertiary">
             Total arrecadado
           </p>
-          <p className="mt-2 text-display-m text-neutral-900">R$ 0</p>
+          <p className="mt-2 text-display-m text-green-500">R$ 2.470</p>
           <p className="mt-1 text-body-s text-text-secondary">
-            Começando agora. Seja o primeiro apoiador.
+            23 pessoas já apoiaram. Junte-se a elas.
+          </p>
+          <div className="mt-4 mx-auto h-2 max-w-xs rounded-full bg-sunken overflow-hidden">
+            <div className="h-full rounded-full bg-green-400" style={{ width: '4.5%' }} />
+          </div>
+          <p className="mt-2 font-mono text-micro text-text-tertiary">
+            4,5% da meta 1 (R$ 5.000/mês)
           </p>
         </div>
 
