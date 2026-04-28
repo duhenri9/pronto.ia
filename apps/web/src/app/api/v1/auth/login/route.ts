@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { db, users } from '@pronto-ia/database';
+import { db, users, eq } from '@pronto-ia/database';
 import { verifyPassword, signToken } from '@pronto-ia/auth';
 import { UserRole } from '@pronto-ia/types';
-import { eq } from 'drizzle-orm';
 
 const loginSchema = z.object({
   phone: z.string().min(10),

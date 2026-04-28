@@ -14,7 +14,7 @@
     "@pronto-ia/auth": "workspace:*",
     "@pronto-ia/database": "workspace:*",
     "@pronto-ia/types": "workspace:*",
-    "drizzle-orm": "^0.44.0",
+    "@sentry/nextjs": "^10.50.0",
     "lucide-react": "^0.460.0",
     "next": "^15.3.0",
     "react": "^19.1.0",

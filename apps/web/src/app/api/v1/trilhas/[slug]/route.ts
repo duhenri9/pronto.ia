@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, trilhas } from '@pronto-ia/database';
-import { eq } from 'drizzle-orm';
+import { db, trilhas, eq } from '@pronto-ia/database';
 
 export async function GET(
   _request: NextRequest,
