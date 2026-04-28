@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
   transpilePackages: [
@@ -11,6 +12,4 @@ const nextConfig: NextConfig = {
   ],
 };
 
-// Sentry disabled until instrumentation.ts + global-error.ts are properly configured.
-// Re-enable with: export default withSentryConfig(nextConfig, { silent: true });
-export default nextConfig;
+export default withSentryConfig(nextConfig, { silent: true });

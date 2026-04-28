@@ -19,3 +19,4 @@ files.zip
 index.html
 prontoia_design_concept_mockup.html
 .next/
+*.tsbuildinfo
