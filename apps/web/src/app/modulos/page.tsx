@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   Sparkles, Shield, Briefcase, TrendingUp,
   ArrowRight, MessageCircle, Users,
-  Timer, Star, Globe, Heart, BookOpen, ChevronDown
+  Timer, Star, Globe, Heart, BookOpen, ChevronDown, Rocket
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -293,6 +293,47 @@ export default function ModulosPage() {
         </div>
       </section>
 
+      {/* ── Como aprender com a Maria ── */}
+      <section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white/90 mb-16">
+            Como aprender com a Maria?
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: '1',
+                icon: MessageCircle,
+                title: 'Chame a Maria',
+                text: 'Mande um "Oi" no WhatsApp. É de graça, sem cadastro, sem complicação.',
+              },
+              {
+                step: '2',
+                icon: BookOpen,
+                title: 'Escolha sua trilha',
+                text: 'Ela te mostra as opções e você decide por onde começar — do básico ao avançado.',
+              },
+              {
+                step: '3',
+                icon: Rocket,
+                title: 'Aprenda e aplique',
+                text: 'Cada aula tem um exercício prático. Você aprende e já usa no mesmo dia.',
+              },
+            ].map((item) => (
+              <div key={item.step} className="text-center group">
+                <div className="w-16 h-16 rounded-2xl bg-[#1A2150] border border-[#252B54] flex items-center justify-center mx-auto mb-4 group-hover:border-[#00D97E]/30 transition-colors">
+                  <span className="text-2xl font-bold text-[#00D97E]">{item.step}</span>
+                </div>
+                <item.icon className="w-6 h-6 text-[#00D97E] mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-white/90 mb-2">{item.title}</h3>
+                <p className="text-sm text-[#9DA1B4] leading-relaxed">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── FAQ ── */}
       <section className="py-24 px-6 bg-[#0F1535]/20">
         <div className="max-w-3xl mx-auto">
@@ -322,14 +363,14 @@ export default function ModulosPage() {
 
       {/* ── CTA Final ── */}
       <section className="py-24 px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold text-white/90 mb-4">
-          Pronto pra começar?
+        <h2 className="text-3xl md:text-5xl font-bold text-white/90 mb-4">
+          Pronta pra começar?
         </h2>
-        <p className="text-[#9DA1B4] text-lg max-w-xl mx-auto mb-8">
-          A Maria está esperando você. É grátis, é rápido e o primeiro resultado já aparece hoje.
+        <p className="text-[#9DA1B4] text-lg mb-8 max-w-xl mx-auto">
+          A Maria está te esperando. Escolha um módulo e em 20 minutos você já aprendeu algo novo.
         </p>
         <a
-          href="https://wa.me/5511999999999?text=Oi%20Maria%21%20Quero%20começar"
+          href="https://wa.me/5511999999999?text=Oi%20Maria%21"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-3 bg-[#00D97E] text-[#0A0E1A] px-10 py-5 rounded-full font-semibold text-lg hover:scale-105 hover:shadow-xl hover:shadow-[#00D97E]/20 transition-all duration-300"
