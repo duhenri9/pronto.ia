@@ -95,5 +95,5 @@ Estes Termos são regidos pela legislação brasileira. Para resolução de conf
 - **Razão social / Nome:** WM3 DIGITAL LTDA
 - **CNPJ / CPF:** 55.060.419/0001-20
 - **Endereço:** Rua Cel Jose Eusebio, 95, Casa 13, Higienópolis, São Paulo - SP, CEP 01239-030
-- **E-mail de contato:** contato@prontoia.com.br
-- **Encarregado (DPO):** contato@prontoia.com.br
+- **E-mail de contato:** contato@prontoia.wm3digital.com.br
+- **Encarregado (DPO):** contato@prontoia.wm3digital.com.br
