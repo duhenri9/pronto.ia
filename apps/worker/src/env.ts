@@ -1,0 +1,74 @@
+// ============================================
+// PRONTO.IA — Worker Environment Validation
+// ============================================
+// Validates all required environment variables at startup.
+// Crashes immediately if any critical variable is missing.
+
+import 'dotenv/config';
+
+interface EnvConfig {
+  DATABASE_URL: string;
+  REDIS_URL: string;
+  ANTHROPIC_API_KEY: string;
+  WHATSAPP_PROVIDER: 'zapi' | 'cloud_api';
+  PROMPTS_DIR: string;
+  ZAPI_INSTANCE_ID?: string;
+  ZAPI_TOKEN?: string;
+  ZAPI_SECURITY_TOKEN?: string;
+  WHATSAPP_API_TOKEN?: string;
+  WHATSAPP_PHONE_NUMBER_ID?: string;
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN?: string;
+  AI_DEFAULT_MODEL: string;
+  AI_EVALUATION_MODEL: string;
+  AI_DEFAULT_MAX_TOKENS: number;
+}
+
+function required(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`[ENV] Missing required variable: ${name}`);
+    process.exit(1);
+  }
+  return value;
+}
+
+function optional(name: string): string | undefined {
+  return process.env[name];
+}
+
+function resolvePromptsDir(): string {
+  const envDir = optional('PROMPTS_DIR');
+  if (envDir) return envDir;
+
+  // In dev mode (tsx), use the monorepo prompts directory
+  // Relative to this file's location: apps/worker/src/ → ../../prompts/personas
+  const { join } = require('path');
+  return join(__dirname, '..', '..', '..', 'prompts', 'personas');
+}
+
+export const env: EnvConfig = {
+  DATABASE_URL: required('DATABASE_URL'),
+  REDIS_URL: required('REDIS_URL'),
+  ANTHROPIC_API_KEY: required('ANTHROPIC_API_KEY'),
+  WHATSAPP_PROVIDER: (optional('WHATSAPP_PROVIDER') ?? 'zapi') as 'zapi' | 'cloud_api',
+  PROMPTS_DIR: resolvePromptsDir(),
+
+  // Z-API (pilot)
+  ZAPI_INSTANCE_ID: optional('ZAPI_INSTANCE_ID'),
+  ZAPI_TOKEN: optional('ZAPI_TOKEN'),
+  ZAPI_SECURITY_TOKEN: optional('ZAPI_SECURITY_TOKEN'),
+
+  // Cloud API (production)
+  WHATSAPP_API_TOKEN: optional('WHATSAPP_API_TOKEN'),
+  WHATSAPP_PHONE_NUMBER_ID: optional('WHATSAPP_PHONE_NUMBER_ID'),
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: optional('WHATSAPP_WEBHOOK_VERIFY_TOKEN'),
+
+  // LLM defaults
+  AI_DEFAULT_MODEL: optional('AI_DEFAULT_MODEL') ?? 'claude-haiku-4-5-20251001',
+  AI_EVALUATION_MODEL: optional('AI_EVALUATION_MODEL') ?? 'claude-sonnet-4-5-20250514',
+  AI_DEFAULT_MAX_TOKENS: parseInt(optional('AI_DEFAULT_MAX_TOKENS') ?? '800', 10),
+};
+
+console.log('[ENV] Configuration validated');
+console.log(`[ENV] WHATSAPP_PROVIDER=${env.WHATSAPP_PROVIDER}`);
+console.log(`[ENV] PROMPTS_DIR=${env.PROMPTS_DIR}`);
