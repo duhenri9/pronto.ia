@@ -60,7 +60,7 @@ export default function SobrePage() {
             <div>
               <p className="text-heading-s font-medium text-neutral-900">Equipe enxuta</p>
               <p className="mt-1 text-body-s text-text-secondary">
-                3 pessoas construindo algo que acreditam: que IA pode ser pra todo mundo.
+                7 pessoas construindo algo que acreditam: que IA pode ser pra todo mundo.
               </p>
             </div>
           </div>
