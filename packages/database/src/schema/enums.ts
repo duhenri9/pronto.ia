@@ -68,7 +68,7 @@ export const paymentTypeEnum = pgEnum('payment_type', [
 
 export const paymentProviderEnum = pgEnum('payment_provider', [
   'STRIPE',
-  'MERCADO_PAGO',
+  'ABACATE',
   'PIX',
   'BANK_TRANSFER',
 ]);
