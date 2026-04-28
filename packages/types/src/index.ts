@@ -21,18 +21,21 @@ export enum Vertical {
   SALAO = 'SALAO',
   FOOD_SERVICE = 'FOOD_SERVICE',
   HOME_SERVICE = 'HOME_SERVICE',
+  TECH_SERVICE = 'TECH_SERVICE',
 }
 
 export const VERTICAL_LABELS: Record<Vertical, string> = {
   [Vertical.SALAO]: 'Salão de Beleza & Estética',
   [Vertical.FOOD_SERVICE]: 'Food Service Local',
   [Vertical.HOME_SERVICE]: 'Prestadores de Serviço',
+  [Vertical.TECH_SERVICE]: 'TI & Tecnologia',
 };
 
 export const VERTICAL_PERSONAS: Record<Vertical, { name: string; slug: string }> = {
   [Vertical.SALAO]: { name: 'Bia', slug: 'bia' },
   [Vertical.FOOD_SERVICE]: { name: 'Léo', slug: 'leo' },
   [Vertical.HOME_SERVICE]: { name: 'Tião', slug: 'tiao' },
+  [Vertical.TECH_SERVICE]: { name: 'Zé', slug: 'ze' },
 };
 
 // ---- Trilhas ----
@@ -91,7 +94,7 @@ export interface WhatsAppOutgoingMessage {
 // ---- Maria Persona ----
 export interface MariaMessage {
   text: string;
-  persona: 'maria' | 'bia' | 'leo' | 'tiao';
+  persona: 'maria' | 'bia' | 'leo' | 'tiao' | 'ze';
   emoji?: string;
   lessonId?: string;
   exercisePrompt?: string;

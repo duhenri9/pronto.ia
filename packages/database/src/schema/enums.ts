@@ -16,6 +16,7 @@ export const verticalEnum = pgEnum('vertical', [
   'SALAO',
   'FOOD_SERVICE',
   'HOME_SERVICE',
+  'TECH_SERVICE',
 ]);
 
 // ─── Trilha ───
