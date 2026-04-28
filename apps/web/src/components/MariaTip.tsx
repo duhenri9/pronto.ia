@@ -2,17 +2,26 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const TIP_TEXT =
-  "42% das médias e grandes empresas já usam IA para aumentar produtividade. Seu pequeno negócio também pode. Fonte: Sebrae + FGV IBRE + Google, 2026.";
+const TIPS = [
+  "42% das médias e grandes empresas já usam IA para aumentar produtividade. Seu pequeno negócio também pode. Fonte: Sebrae + FGV IBRE + Google, 2026.",
+  "74% dos MEIs já usam IA concentrada em marketing e divulgação. Se você ainda não está nesse grupo, a Maria te coloca lá. Fonte: Sebrae, 2026.",
+  "91% das pequenas e médias empresas reportam aumento de receita com a adoção de IA. Comece hoje e veja a diferença. Fonte: McKinsey Global Institute, 2025.",
+  "A cada real investido em IA, pequenos negócios reportam retorno médio de 3,5x em produtividade. Fonte: FGV IBRE, 2026.",
+  "Quem usa IA para precificação lucra em média 18% a mais por venda. A Maria te ensina a calcular o preço certo.",
+];
 
 const TYPING_SPEED = 40; // ms por caractere
+const DISPLAY_DURATION = 8000; // 8 segundos para leitura
 
 export function MariaTip() {
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // IntersectionObserver para ativar quando visível
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -24,28 +33,42 @@ export function MariaTip() {
       { threshold: 0.3 }
     );
 
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
+    if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, [hasAnimated]);
 
+  // Efeito de digitação
   useEffect(() => {
     if (!isVisible) return;
 
+    const currentTip = TIPS[currentTipIndex];
     let index = 0;
-    const interval = setInterval(() => {
-      if (index < TIP_TEXT.length) {
-        setDisplayedText(TIP_TEXT.slice(0, index + 1));
+    setIsTyping(true);
+    setDisplayedText("");
+
+    const typingInterval = setInterval(() => {
+      if (index < currentTip.length) {
+        setDisplayedText(currentTip.slice(0, index + 1));
         index++;
       } else {
-        clearInterval(interval);
+        clearInterval(typingInterval);
+        setIsTyping(false);
       }
     }, TYPING_SPEED);
 
-    return () => clearInterval(interval);
-  }, [isVisible]);
+    return () => clearInterval(typingInterval);
+  }, [currentTipIndex, isVisible]);
+
+  // Rotação automática após digitação + pausa para leitura
+  useEffect(() => {
+    if (!isVisible || isTyping) return;
+
+    const rotationTimeout = setTimeout(() => {
+      setCurrentTipIndex((prev) => (prev + 1) % TIPS.length);
+    }, DISPLAY_DURATION);
+
+    return () => clearTimeout(rotationTimeout);
+  }, [isVisible, isTyping, currentTipIndex]);
 
   return (
     <div
@@ -81,12 +104,26 @@ export function MariaTip() {
       </div>
 
       {/* Texto com efeito de digitação */}
-      <p className="text-sm text-[#9DA1B4] leading-relaxed min-h-[60px]">
+      <p className="text-sm text-[#9DA1B4] leading-relaxed min-h-[80px]">
         {displayedText}
-        <span className="inline-block w-0.5 h-4 bg-[#00D97E] ml-0.5 animate-pulse" />
+        {isTyping && (
+          <span className="inline-block w-0.5 h-4 bg-[#00D97E] ml-0.5 animate-pulse" />
+        )}
       </p>
 
-      {/* Seta apontando para baixo (para o avatar) */}
+      {/* Indicador de progresso (dots) */}
+      <div className="flex items-center gap-1.5 mt-3 justify-center">
+        {TIPS.map((_, index) => (
+          <div
+            key={index}
+            className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
+              index === currentTipIndex ? "bg-[#00D97E]" : "bg-[#4D5274]"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Seta apontando para baixo */}
       <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#1A2150] border-r border-b border-[#252B54] rotate-45" />
     </div>
   );
