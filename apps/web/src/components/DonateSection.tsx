@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Heart, X, Copy, Check, Coffee, Rocket, Shield, Wallet, ArrowRight } from 'lucide-react';
+import { Heart, X, Copy, Check, Coffee, Rocket, Wallet, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 /* ── Tiers de valor ── */
@@ -20,7 +20,7 @@ const VALUE_TIERS = [
   {
     id: 'apoio',
     label: 'Apoio',
-    icon: Shield,
+    icon: Heart,
     accent: '#00D97E',
     values: [
       { label: 'R$ 50', cents: 5000 },
@@ -240,6 +240,7 @@ export function DonateSection() {
                   disabled={!canDonate}
                   className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#00D97E] py-3.5 text-body-m font-medium text-[#0F1535] hover:scale-[1.02] transition-all duration-fast ease-out disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
+                  <Heart size={16} fill="#0F1535" />
                   {buttonText}
                   {canDonate && <ArrowRight size={16} />}
                 </button>
@@ -265,9 +266,9 @@ export function DonateSection() {
             {state === 'success' && (
               <div className="flex flex-col items-center">
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00D97E]/20">
-                  <Check size={28} className="text-[#00D97E]" />
+                  <Heart size={28} className="text-[#00D97E]" fill="#00D97E" />
                 </div>
-                <p className="mt-4 text-heading-s font-medium text-white/90">Obrigado!</p>
+                <p className="mt-4 text-heading-s font-medium text-white/90">Obrigado</p>
                 <p className="mt-2 text-center text-body-s text-white/70">
                   Você ajuda a capacitar o Brasil para a era da IA.
                 </p>
