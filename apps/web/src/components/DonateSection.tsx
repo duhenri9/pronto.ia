@@ -167,7 +167,7 @@ export function DonateSection() {
             {state === 'selecting' && (
               <div className="mb-6">
                 <h3 className="text-heading-s font-medium text-white/90 mb-2">
-                  Cada real capacita um MEI brasileiro para a era da IA
+                  Cada real capacita um Empreendedor brasileiro para a era da IA
                 </h3>
                 <p className="text-body-s text-white/70 leading-relaxed">
                   A plataforma Pronto.IA treina MEIs de graça, no WhatsApp, sem complicação. Seu apoio paga os servidores, a IA e a equipe que faz isso acontecer de verdade.
