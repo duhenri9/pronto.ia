@@ -2,29 +2,32 @@
   "name": "@pronto-ia/web",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "lint": "eslint src/",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "clean": "rm -rf .next dist",
+    "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.30.3",
-    "lucide-react": "^0.460.0"
+    "@pronto-ia/auth": "workspace:*",
+    "@pronto-ia/database": "workspace:*",
+    "@pronto-ia/types": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "lucide-react": "^0.460.0",
+    "next": "^15.3.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
-    "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.19",
-    "typescript": "^5.7.0",
-    "vite": "^6.4.2"
+    "typescript": "^5.7.0"
   }
 }

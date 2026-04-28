@@ -1,5 +1,5 @@
 {
-  "name": "@pronto-ia/auth",
+  "name": "@pronto-ia/events",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
@@ -9,14 +9,7 @@
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {
-    "@pronto-ia/types": "workspace:*",
-    "bcryptjs": "^2.4.3",
-    "jose": "^6.0.0"
-  },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   }
 }

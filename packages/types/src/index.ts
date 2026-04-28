@@ -5,7 +5,7 @@
 // ---- Auth ----
 export interface AuthPayload {
   userId: string;
-  email: string;
+  phone: string;
   role: UserRole;
 }
 
@@ -97,6 +97,32 @@ export interface MariaMessage {
   exercisePrompt?: string;
 }
 
+// ---- Anthropic Claude ----
+export const ANTHROPIC_MODELS = {
+  HAIKU: 'claude-haiku-4-5-20251001',
+  SONNET: 'claude-sonnet-4-5-20250514',
+} as const;
+
+export type AnthropicModel = (typeof ANTHROPIC_MODELS)[keyof typeof ANTHROPIC_MODELS];
+
+export interface LLMConfig {
+  model: AnthropicModel;
+  maxTokens: number;
+  temperature?: number;
+}
+
+export const DEFAULT_LLM_CONFIG: LLMConfig = {
+  model: ANTHROPIC_MODELS.HAIKU,
+  maxTokens: 800,
+  temperature: 0.7,
+};
+
+export const EVALUATION_LLM_CONFIG: LLMConfig = {
+  model: ANTHROPIC_MODELS.SONNET,
+  maxTokens: 600,
+  temperature: 0.3,
+};
+
 // ---- Outcome ----
 export interface OutcomeReport {
   userId: string;
@@ -107,3 +133,15 @@ export interface OutcomeReport {
   deltaPercent: number | null;
   reportedAt: Date;
 }
+
+// ---- User Memory ----
+export enum MemoryType {
+  PREFERENCE = 'preference',
+  CONTEXT = 'context',
+  CONVERSATION_SUMMARY = 'conversation_summary',
+  BUSINESS_INFO = 'business_info',
+  ONBOARDING_DATA = 'onboarding_data',
+}
+
+// ---- LGPD ----
+export const LGPD_CONSENT_VERSION = '1.0.0';
