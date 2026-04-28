@@ -7,7 +7,7 @@ Approved · Phase 3
 ## Context
 
 Pronto.IA needs payment processing for:
-- **B2C Pro**: R$19/month subscription (Brazilian MEIs)
+- **B2C Pro**: R$29/month subscription (Brazilian MEIs)
 - **B2G Contract**: Municipal/state government contracts (large volumes)
 - **B2B Partner**: SEBRAE/SENAC partnerships
 

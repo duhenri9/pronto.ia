@@ -7,7 +7,7 @@ conhecimentos, conectando as oportunidades e desafios da Inteligência Artificia
 ao dia a dia das pessoas. Começamos pelos MEIs brasileiros — 15 milhões de
 microempreendedores, 80% sem acesso a capacitação digital.
 
-Modelo freemium: MVP gratuito via WhatsApp, com plano Pro (R$ 19-29/mês)
+Modelo freemium: MVP gratuito via WhatsApp, com plano Pro (R$ 29/mês)
 previsto para a fase 3. Potencial de impacto: 15 milhões de pessoas.
 
 ## 2. Problema
