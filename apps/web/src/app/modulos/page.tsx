@@ -4,15 +4,15 @@ import { useState } from 'react';
 import {
   Sparkles, Shield, Briefcase, TrendingUp,
   ArrowRight, MessageCircle, Users,
-  Star, Globe, Heart, BookOpen, ChevronDown, Rocket
+  Timer, Star, Globe, Heart, BookOpen, ChevronDown, Rocket
 } from 'lucide-react';
 import Link from 'next/link';
 
 const HERO_STATS = [
   { icon: BookOpen, value: '4', label: 'Módulos completos' },
+  { icon: Timer, value: '< 30 min', label: 'Por módulo' },
   { icon: Star, value: '100%', label: 'Grátis e vitalício' },
   { icon: Users, value: '+15M', label: 'meis no Brasil' },
-  { icon: Rocket, value: 'No seu ritmo', label: 'Sem pressa' },
 ];
 
 const MODULOS = [
@@ -21,10 +21,13 @@ const MODULOS = [
     icon: Sparkles,
     number: '01',
     title: 'Primeiros passos com IA',
+    subtitle: 'Getting Started with AI',
+    duration: '20 minutos',
+    modules: '2 submódulos',
     description: 'Entenda o que é IA de verdade, sem exageros e sem medo.',
     lessons: [
-      'O que é Inteligência Artificial?',
-      'Onde a IA já está na sua vida?',
+      'O que é IA e como ela funciona (sem tecniquês)',
+      'Onde a IA já está na sua vida — exemplos práticos',
       'Primeira conversa prática com a Maria',
     ],
     color: 'green',
@@ -34,7 +37,10 @@ const MODULOS = [
     icon: Shield,
     number: '02',
     title: 'IA no seu dia a dia',
-    description: 'Use IA para se proteger, organizar sua rotina e cuidar da saúde.',
+    subtitle: 'Everyday AI',
+    duration: '30 minutos',
+    modules: '3 submódulos',
+    description: 'Use IA para se proteger de golpes, navegar com segurança online e cuidar da sua saúde.',
     lessons: [
       'Como identificar golpes e notícias falsas com IA',
       'Como se proteger online e proteger sua família',
@@ -47,11 +53,14 @@ const MODULOS = [
     icon: Briefcase,
     number: '03',
     title: 'IA no seu trabalho',
-    description: 'Escreva melhor, organize suas contas e crie propostas profissionais.',
+    subtitle: 'AI in Your Job',
+    duration: '20-30 minutos',
+    modules: '2-3 submódulos',
+    description: 'Escreva e-mails e mensagens profissionais, organize suas contas e crie propostas que impressionam.',
     lessons: [
-      'Como escrever mensagens e e-mails profissionais em segundos',
-      'Como organizar as contas e a administração do seu negócio',
-      'Como criar orçamentos e propostas que impressionam',
+      'Como escrever correspondências e e-mails profissionais em segundos',
+      'Como organizar a administração do seu negócio',
+      'Como criar orçamentos e propostas que fecham contratos',
     ],
     color: 'blue',
   },
@@ -60,7 +69,10 @@ const MODULOS = [
     icon: TrendingUp,
     number: '04',
     title: 'IA para crescer na carreira',
-    description: 'Descubra novas oportunidades, monte um currículo competitivo e prepare-se para entrevistas.',
+    subtitle: 'AI to Support Your Career',
+    duration: '20-30 minutos',
+    modules: '2-3 submódulos',
+    description: 'Descubra novas áreas de atuação, monte um currículo competitivo e prepare-se para entrevistas.',
     lessons: [
       'Como descobrir novas áreas de atuação',
       'Como montar um currículo que se destaca',
@@ -87,7 +99,7 @@ const FAQ = [
   },
   {
     q: '"Quanto tempo eu vou demorar pra aprender?"',
-    a: 'Cada módulo tem o tempo que você precisar. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
+    a: 'Cada módulo leva menos de 30 minutos. Você faz no seu ritmo, quando quiser. Não tem prazo, não tem pressa. A Maria te espera — e nunca cobra.',
   },
   {
     q: '"E se eu não gostar?"',
@@ -226,11 +238,16 @@ export default function ModulosPage() {
 
                     {/* Conteúdo */}
                     <div className="flex-1">
-                      <div className="mb-2">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
                         <h3 className="text-2xl font-semibold text-white/90">
                           {modulo.title}
                         </h3>
+                        <span className={`text-xs font-medium px-3 py-1 rounded-full ${c.bg} ${c.border} ${c.text}`}>
+                          {modulo.duration}
+                        </span>
+                        <span className="text-xs text-[#757994]">{modulo.modules}</span>
                       </div>
+                      <p className="text-xs text-[#4D5274] mb-2 font-mono">{modulo.subtitle}</p>
                       <p className="text-[#9DA1B4] leading-relaxed mb-6">
                         {modulo.description}
                       </p>
@@ -355,7 +372,7 @@ export default function ModulosPage() {
           Pronta pra começar?
         </h2>
         <p className="text-[#9DA1B4] text-lg mb-8 max-w-xl mx-auto">
-          A Maria está te esperando. Escolha um módulo e comece a aprender no seu ritmo.
+          A Maria está te esperando. Escolha um módulo — em menos de 30 minutos você já aprendeu algo novo.
         </p>
         <a
           href="https://wa.me/5511999999999?text=Oi%20Maria%21"
