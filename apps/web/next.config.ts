@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
     '@pronto-ia/whatsapp',
     '@pronto-ia/llm',
   ],
+  devIndicators: false,
 };
 
 export default withSentryConfig(nextConfig, { silent: true });
