@@ -12,6 +12,7 @@ export interface WhatsAppProvider {
   sendTemplate(params: SendTemplateParams): Promise<SendMessageResult>;
   markAsRead(messageId: string): Promise<void>;
   verifyWebhook(mode: string, token: string): Promise<boolean>;
+  verifyPayload(body: string, signature: string): Promise<boolean>;
   parseWebhook(body: unknown): ParsedWebhookEvent[];
   getMediaUrl(mediaId: string): Promise<string>;
   downloadMedia(url: string): Promise<Buffer>;
@@ -84,15 +85,18 @@ export class MetaCloudAPI implements WhatsAppProvider {
   private apiToken: string;
   private phoneNumberId: string;
   private verifyToken: string;
+  private appSecret: string;
 
   constructor(config?: {
     apiToken?: string;
     phoneNumberId?: string;
     verifyToken?: string;
+    appSecret?: string;
   }) {
     this.apiToken = config?.apiToken ?? process.env.WHATSAPP_API_TOKEN ?? '';
     this.phoneNumberId = config?.phoneNumberId ?? process.env.WHATSAPP_PHONE_NUMBER_ID ?? '';
     this.verifyToken = config?.verifyToken ?? process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN ?? '';
+    this.appSecret = config?.appSecret ?? process.env.WHATSAPP_APP_SECRET ?? '';
   }
 
   async sendMessage(params: SendTextParams): Promise<SendMessageResult> {
@@ -167,6 +171,23 @@ export class MetaCloudAPI implements WhatsAppProvider {
 
   async verifyWebhook(mode: string, token: string): Promise<boolean> {
     return mode === 'subscribe' && token === this.verifyToken;
+  }
+
+  async verifyPayload(body: string, signature: string): Promise<boolean> {
+    if (!this.appSecret) {
+      // In dev without app secret configured, skip verification
+      return true;
+    }
+    const crypto = await import('crypto');
+    const expectedSig = 'sha256=' + crypto
+      .createHmac('sha256', this.appSecret)
+      .update(body)
+      .digest('hex');
+
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSig),
+      Buffer.from(signature),
+    );
   }
 
   parseWebhook(body: unknown): ParsedWebhookEvent[] {
@@ -330,6 +351,19 @@ export class ZAPIProvider implements WhatsAppProvider {
 
   async verifyWebhook(mode: string, token: string): Promise<boolean> {
     return mode === 'subscribe' && token === this.securityToken;
+  }
+
+  async verifyPayload(body: string, signature: string): Promise<boolean> {
+    const crypto = await import('crypto');
+    const hash = crypto
+      .createHmac('sha256', this.securityToken)
+      .update(body)
+      .digest('hex');
+
+    return crypto.timingSafeEqual(
+      Buffer.from(hash),
+      Buffer.from(signature),
+    );
   }
 
   parseWebhook(body: unknown): ParsedWebhookEvent[] {
