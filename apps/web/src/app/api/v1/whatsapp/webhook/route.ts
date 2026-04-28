@@ -2,7 +2,7 @@
 // PRONTO.IA — WhatsApp Webhook API Route
 // ============================================
 // Receives inbound messages from Z-API or Meta Cloud API,
-// validates the request, parses the message, and enqueues
+// validates HMAC signature, parses the message, and enqueues
 // a BullMQ job for the worker to process asynchronously.
 //
 // Architecture: Vercel (this route) → Redis → Railway (worker)
@@ -12,22 +12,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Queue } from 'bullmq';
 import { createWhatsAppProvider } from '@pronto-ia/whatsapp';
 import type { ParsedWebhookEvent } from '@pronto-ia/whatsapp';
-import { redis } from '@/lib/redis';
+import { getRedisConnection } from '@/lib/redis';
 
 // BullMQ queue — same name as worker's inboundQueue
-const inboundQueue = new Queue('whatsapp.inbound', { connection: redis });
+const inboundQueue = new Queue('whatsapp.inbound', {
+  connection: getRedisConnection(),
+});
 
 // ---- GET: Webhook Verification (Meta Cloud API) ----
 
 export async function GET(request: NextRequest) {
   const provider = createWhatsAppProvider();
+  const { searchParams } = new URL(request.url);
 
-  const mode = request.nextUrl.searchParams.get('hub.mode');
-  const token = request.nextUrl.searchParams.get('hub.verify_token');
-  const challenge = request.nextUrl.searchParams.get('hub.challenge');
+  const mode = searchParams.get('hub.mode') ?? searchParams.get('mode');
+  const token = searchParams.get('hub.verify_token') ?? searchParams.get('token');
+  const challenge = searchParams.get('hub.challenge');
 
   if (!mode || !token) {
-    return NextResponse.json({ error: 'Missing verification parameters' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
   }
 
   const isValid = await provider.verifyWebhook(mode, token);
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Meta expects the challenge to be returned as plain text
-  return new NextResponse(challenge ?? 'verified', { status: 200 });
+  return new NextResponse(challenge ?? 'ok', { status: 200 });
 }
 
 // ---- POST: Inbound Message Handler ----
@@ -45,29 +48,46 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const provider = createWhatsAppProvider();
 
-  // 1. Parse raw body
-  let body: unknown;
+  // 1. Get raw body text (needed for HMAC verification)
+  const bodyText = await request.text();
+
+  // 2. Verify HMAC signature
+  // Z-API: X-ZAPI-HMAC-SHA256 header
+  // Meta Cloud API: X-Hub-Signature-256 header
+  const signature =
+    request.headers.get('x-zapi-hmac-sha256') ?? // Z-API
+    request.headers.get('x-hub-signature-256') ?? // Meta Cloud API
+    '';
+
+  if (signature) {
+    const isValid = await provider.verifyPayload(bodyText, signature);
+    if (!isValid) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+  }
+
+  // 3. Parse JSON payload
+  let payload: unknown;
   try {
-    body = await request.json();
+    payload = JSON.parse(bodyText);
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  // 2. Parse webhook events using provider
-  const events: ParsedWebhookEvent[] = provider.parseWebhook(body);
+  // 4. Parse webhook events using provider
+  const events: ParsedWebhookEvent[] = provider.parseWebhook(payload);
 
-  if (events.length === 0) {
-    // No actionable events (e.g. status update only)
-    return NextResponse.json({ status: 'no_message' }, { status: 200 });
-  }
-
-  // 3. Filter only message events (ignore status updates)
+  // 5. Filter only message events (ignore status updates)
   const messageEvents = events.filter((e) => e.eventType === 'message');
 
-  // 4. Enqueue each message as a BullMQ job
+  if (messageEvents.length === 0) {
+    return NextResponse.json({ status: 'no_messages' });
+  }
+
+  // 6. Enqueue each message as a BullMQ job
   for (const event of messageEvents) {
     await inboundQueue.add(
-      `inbound-${event.phone}-${event.messageId}`,
+      'inbound-message',
       {
         phone: event.phone,
         messageText: event.text ?? '',
@@ -88,7 +108,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 5. Respond immediately — do NOT wait for LLM processing
+  // 7. Respond immediately — do NOT wait for LLM processing
   return NextResponse.json(
     { status: 'queued', count: messageEvents.length },
     { status: 202 },
