@@ -4,107 +4,92 @@ import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Transparência — Pronto.IA',
-  description: 'Cada real importa. Veja como seu apoio mantém o Pronto.IA no ar.',
+  description: 'Cada real importa. Veja como usamos os recursos para manter o Pronto.IA no ar.',
 };
 
 const COSTS = [
-  { component: 'Infraestrutura', detail: 'Workers, banco, cache, CDN', cost: 'R$ 3.000 – 8.000' },
-  { component: 'Inteligência Artificial', detail: 'LLM para 100k usuários', cost: 'R$ 15.000 – 25.000' },
-  { component: 'Equipe', detail: '7 pessoas', cost: 'R$ 35.000' },
-  { component: 'Outros', detail: 'Domínio, email, compliance', cost: 'R$ 1.500' },
+  { component: 'Infraestrutura (workers, banco, cache, CDN)', cost: 'R$ 3.000 – 8.000' },
+  { component: 'Inteligência Artificial (LLM)', cost: 'R$ 15.000 – 25.000' },
+  { component: 'Equipe (3 pessoas)', cost: 'R$ 35.000' },
+  { component: 'Outros (domínio, email, compliance)', cost: 'R$ 1.500' },
 ];
 
 const MILESTONES = [
-  { color: 'bg-green-400', amount: 'R$ 5.000/mês', description: 'Manter MVP no ar, 0–300 alunos' },
-  { color: 'bg-gold-400', amount: 'R$ 20.000/mês', description: 'Expandir trilhas, 1.000 alunos' },
-  { color: 'bg-orange-400', amount: 'R$ 55.000/mês', description: 'Escala 100k alunos, equipe dedicada' },
-  { color: 'bg-red-400', amount: 'R$ 130.000+/mês', description: 'Milhões de brasileiros capacitados' },
+  { color: 'green', goal: 'Meta 1 — R$ 5.000/mês', description: 'Manter o MVP no ar, atendendo 0-300 alunos.' },
+  { color: 'yellow', goal: 'Meta 2 — R$ 20.000/mês', description: 'Expandir trilhas, alcançar 1.000 alunos.' },
+  { color: 'orange', goal: 'Meta 3 — R$ 55.000/mês', description: 'Escala para 100.000 alunos, equipe dedicada.' },
+  { color: 'red', goal: 'Meta 4 — R$ 130.000+/mês', description: 'Milhões de brasileiros capacitados para a era da IA.' },
 ];
+
+const META_COLORS: Record<string, string> = {
+  green: 'bg-[#00D97E]/10 border-[#00D97E]/30',
+  yellow: 'bg-yellow-500/10 border-yellow-500/30',
+  orange: 'bg-orange-500/10 border-orange-500/30',
+  red: 'bg-red-500/10 border-red-500/30',
+};
 
 export default function TransparenciaPage() {
   return (
-    <div className="min-h-screen bg-canvas text-text-primary">
+    <main className="min-h-screen bg-[#0F1535] text-white/90 pt-24 pb-16">
       <Nav />
-      <div className="mx-auto max-w-container px-6 py-20 pt-28 md:py-24">
-        {/* Header */}
-        <span className="font-mono text-micro font-medium uppercase tracking-micro text-green-600">
-          cada real importa
-        </span>
-        <h1 className="mt-3 text-display-l tracking-display text-neutral-900">
-          Transparência
-        </h1>
-        <p className="mt-4 max-w-2xl font-serif text-body-l italic text-text-secondary">
-          O Pronto.IA é um projeto independente. Cada doação vai direto pra manter a plataforma no ar e alcançar mais pessoas.
+      <div className="max-w-3xl mx-auto px-6">
+        <h1 className="text-4xl font-bold mb-4">Transparência</h1>
+        <p className="text-lg text-[#9DA1B4] mb-12">
+          Cada real importa. Veja como usamos os recursos para manter o Pronto.IA no ar.
         </p>
 
-        {/* Total arrecadado */}
-        <div className="mt-12 rounded-lg border border-border-subtle bg-surface p-8 text-center">
-          <p className="font-mono text-micro uppercase tracking-micro text-text-tertiary">
-            Total arrecadado
-          </p>
-          <p className="mt-2 text-display-m text-green-500">R$ 2.470</p>
-          <p className="mt-1 text-body-s text-text-secondary">
+        {/* Total Arrecadado */}
+        <div className="bg-[#1A2150] rounded-xl p-6 mb-8 text-center">
+          <p className="text-sm text-[#757994] mb-2">Total arrecadado</p>
+          <p className="text-4xl font-bold text-[#00D97E]">R$ 2.470</p>
+          <p className="text-sm text-[#9DA1B4] mt-2">
             23 pessoas já apoiaram. Junte-se a elas.
           </p>
-          <div className="mt-4 mx-auto h-2 max-w-xs rounded-full bg-sunken overflow-hidden">
-            <div className="h-full rounded-full bg-green-400" style={{ width: '49.4%' }} />
+          <div className="mt-4 mx-auto h-2 max-w-xs rounded-full bg-[#252B54] overflow-hidden">
+            <div className="h-full rounded-full bg-[#00D97E]" style={{ width: '49.4%' }} />
           </div>
-          <p className="mt-2 font-mono text-micro text-text-tertiary">
+          <p className="mt-2 text-xs text-[#757994]">
             49,4% da meta 1 (R$ 5.000/mês)
           </p>
         </div>
 
-        {/* Custos mensais */}
-        <div className="mt-12">
-          <h2 className="text-heading-l text-neutral-900">Nossos custos mensais</h2>
-          <p className="mt-2 text-body-s text-text-secondary">
-            Projeção para operar com 100 mil pessoas /alun@s.
-          </p>
-
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border-subtle">
-                  <th className="py-3 text-left font-mono text-micro uppercase tracking-micro text-text-tertiary">Componente</th>
-                  <th className="py-3 text-left font-mono text-micro uppercase tracking-micro text-text-tertiary">Detalhe</th>
-                  <th className="py-3 text-right font-mono text-micro uppercase tracking-micro text-text-tertiary">Custo Mensal</th>
+        {/* Tabela de Custos */}
+        <h2 className="text-2xl font-semibold mt-12 mb-4">Nossos custos mensais</h2>
+        <div className="bg-[#1A2150] rounded-xl overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#252B54]">
+                <th className="text-left p-4 text-[#757994] font-medium">Componente</th>
+                <th className="text-right p-4 text-[#757994] font-medium">Custo</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#252B54]">
+              {COSTS.map((row) => (
+                <tr key={row.component}>
+                  <td className="p-4">{row.component}</td>
+                  <td className="p-4 text-right">{row.cost}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {COSTS.map((row) => (
-                  <tr key={row.component} className="border-b border-border-subtle">
-                    <td className="py-3 text-body-s font-medium text-neutral-900">{row.component}</td>
-                    <td className="py-3 text-body-s text-text-secondary">{row.detail}</td>
-                    <td className="py-3 text-right text-body-s font-medium text-neutral-900 tabular-nums">{row.cost}</td>
-                  </tr>
-                ))}
-                <tr className="border-t-2 border-neutral-900">
-                  <td className="py-3 text-heading-s font-medium text-neutral-900" colSpan={2}>Total (100k usuários)</td>
-                  <td className="py-3 text-right text-heading-s font-medium text-green-600 tabular-nums">R$ 54.500 – 69.500</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+              <tr className="bg-[#00D97E]/5">
+                <td className="p-4 font-semibold">Total</td>
+                <td className="p-4 text-right font-semibold text-[#00D97E]">R$ 54.500 – 69.500</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Metas */}
-        <div className="mt-12">
-          <h2 className="text-heading-l text-neutral-900">Metas</h2>
-          <div className="mt-6 space-y-4">
-            {MILESTONES.map((m) => (
-              <div key={m.amount} className="flex items-start gap-4 rounded-lg border border-border-subtle bg-surface p-5">
-                <span className={`mt-1 inline-block h-3 w-3 rounded-full ${m.color} flex-shrink-0`} />
-                <div>
-                  <p className="text-heading-s font-medium text-neutral-900">{m.amount}</p>
-                  <p className="mt-0.5 text-body-s text-text-secondary">{m.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        <h2 className="text-2xl font-semibold mt-12 mb-4">Metas</h2>
+        <div className="space-y-4">
+          {MILESTONES.map((m) => (
+            <div key={m.goal} className={`p-4 rounded-lg border ${META_COLORS[m.color]}`}>
+              <p className="font-semibold text-white/90">{m.goal}</p>
+              <p className="text-sm text-[#9DA1B4] mt-1">{m.description}</p>
+            </div>
+          ))}
         </div>
       </div>
-
       <Footer />
-    </div>
+    </main>
   );
 }

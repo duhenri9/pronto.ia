@@ -27,7 +27,7 @@ export default function HomePage() {
               A Maria te ensina a usar IA pra ganhar mais.
             </h1>
             <p className="mt-4 font-serif text-body-l italic text-text-secondary">
-              5 minutos por dia, no WhatsApp. Sem aula chata, sem termo difícil.
+              Uma plataforma educacional que potencializa e multiplica conhecimentos — conectando as oportunidades e desafios da Inteligência Artificial ao dia a dia das pessoas.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <a

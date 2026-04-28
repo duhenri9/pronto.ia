@@ -8,7 +8,13 @@ Ao acessar e utilizar o Pronto.IA ("Plataforma"), você concorda com estes Termo
 
 ## 2. Descrição do Serviço
 
-O Pronto.IA é uma plataforma de capacitação em inteligência artificial para Microempreendedores Individuais (MEIs), operada via WhatsApp. O serviço oferece mentoria personalizada por meio de inteligência artificial, com trilhas de aprendizado divididas por verticais de atuação.
+O Pronto.IA é uma plataforma educacional que utiliza Inteligência Artificial
+para potencializar o aprendizado e multiplicar conhecimentos, preparando pessoas
+para as oportunidades e desafios da IA no dia a dia.
+
+Oferecido por **WM3 DIGITAL LTDA**, inscrita no CNPJ **55.060.419/0001-20**,
+com sede na **Rua Cel Jose Eusebio, 95, Casa 13, Higienópolis, São Paulo - SP,
+CEP 01239-030**.
 
 ## 3. Elegibilidade
 

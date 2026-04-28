@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Scissors, ChefHat, Wrench, Laptop } from 'lucide-react';
+import { Scissors, UtensilsCrossed, Wrench, Laptop } from 'lucide-react';
 
 const VERTICALS = [
   {
@@ -19,7 +19,7 @@ const VERTICALS = [
     slug: 'food-service',
     name: 'Food Service Local',
     persona: 'Léo',
-    icon: ChefHat,
+    icon: UtensilsCrossed,
     accent: 'gold' as const,
     tagline: 'Seu cardápio inteligente, seu delivery sem dono',
     description:

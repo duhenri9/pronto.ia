@@ -2,7 +2,13 @@
 
 ## 1. Sumário Executivo
 
-O Pronto.IA capacita MEIs brasileiros em inteligência artificial via WhatsApp, de graça, em português, 5 minutos por dia. Com 12+ milhões de MEIs no Brasil e nenhum competidor direto nesse formato, o projeto preenche uma lacuna real entre tecnologia e quem mais precisa dela.
+O Pronto.IA é uma plataforma educacional que potencializa e multiplica
+conhecimentos, conectando as oportunidades e desafios da Inteligência Artificial
+ao dia a dia das pessoas. Começamos pelos MEIs brasileiros — 15 milhões de
+microempreendedores, 80% sem acesso a capacitação digital.
+
+Modelo freemium: MVP gratuito via WhatsApp, com plano Pro (R$ 19-29/mês)
+previsto para a fase 3. Potencial de impacto: 15 milhões de pessoas.
 
 ## 2. Problema
 
