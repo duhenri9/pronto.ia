@@ -135,6 +135,13 @@ const MODULOS = [
   },
 ];
 
+const MODULO_TO_TRILHA: Record<string, string> = {
+  'primeiros-passos': 'fim-do-medo',
+  'ia-no-dia-a-dia': 'arte-do-pedido',
+  'ia-no-trabalho': 'marketing-e-vendas',
+  'ia-na-carreira': 'proximo-nivel',
+};
+
 const COLORS: Record<string, { bg: string; border: string; text: string; accent: string }> = {
   green: { bg: 'bg-[#00D97E]/5', border: 'border-[#00D97E]/20', text: 'text-[#00D97E]', accent: 'bg-[#00D97E]' },
   yellow: { bg: 'bg-[#FFD60A]/5', border: 'border-[#FFD60A]/20', text: 'text-[#FFD60A]', accent: 'bg-[#FFD60A]' },
@@ -496,7 +503,7 @@ export default function TrilhasPage() {
                       </div>
 
                       <a
-                        href={`#${modulo.id}`}
+                        href={`#${MODULO_TO_TRILHA[modulo.id] || modulo.id}`}
                         className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full border ${c.border} ${c.text} text-sm font-medium hover:${c.bg} transition-colors`}
                       >
                         Saber Mais...

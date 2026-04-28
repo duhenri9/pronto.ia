@@ -8,6 +8,9 @@ const TIPS = [
   "91% das pequenas e médias empresas reportam aumento de receita com a adoção de IA. Comece hoje e veja a diferença. Fonte: McKinsey Global Institute, 2025.",
   "A cada real investido em IA, pequenos negócios reportam retorno médio de 3,5x em produtividade. Fonte: FGV IBRE, 2026.",
   "Quem usa IA para precificação lucra em média 18% a mais por venda. A Maria te ensina a calcular o preço certo.",
+  "Aplicar IA na gestão financeira reduz erros em até 40% e libera tempo para o que realmente importa: vender mais. Fonte: FGV IBRE, 2026.",
+  "Pequenos negócios que usam IA para marketing digital têm 3x mais chances de expandir sua base de clientes em 6 meses. Fonte: Sebrae, 2026.",
+  "Até 2027, 60% das micro e pequenas empresas brasileiras planejam adotar alguma ferramenta de IA. Não fique para trás. Fonte: McKinsey, 2026.",
 ];
 
 const TYPING_SPEED = 40; // ms por caractere
