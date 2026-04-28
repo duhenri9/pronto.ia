@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
+import { Heart } from 'lucide-react';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { DonateSection } from '@/components/DonateSection';
 
 export const metadata: Metadata = {
   title: 'Transparência — Pronto.IA',
@@ -54,6 +56,20 @@ export default function TransparenciaPage() {
           </p>
         </div>
 
+        {/* Botão Doar — após Total Arrecadado */}
+        <div className="text-center mt-6">
+          <button
+            onClick={() => {
+              const donateBtn = document.querySelector('[aria-label="Apoie o Pronto.IA"]');
+              if (donateBtn instanceof HTMLElement) donateBtn.click();
+            }}
+            className="inline-flex items-center gap-2 bg-[#00D97E] text-[#0A0E1A] px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform duration-240"
+          >
+            <Heart className="w-4 h-4" fill="#0A0E1A" />
+            Doar agora
+          </button>
+        </div>
+
         {/* Tabela de Custos */}
         <h2 className="text-2xl font-semibold mt-12 mb-4">Nossos custos mensais</h2>
         <div className="bg-[#1A2150] rounded-xl overflow-hidden">
@@ -89,8 +105,23 @@ export default function TransparenciaPage() {
             </div>
           ))}
         </div>
+
+        {/* Botão Doar — após Metas */}
+        <div className="text-center mt-8">
+          <button
+            onClick={() => {
+              const donateBtn = document.querySelector('[aria-label="Apoie o Pronto.IA"]');
+              if (donateBtn instanceof HTMLElement) donateBtn.click();
+            }}
+            className="inline-flex items-center gap-2 bg-[#00D97E] text-[#0A0E1A] px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform duration-240"
+          >
+            <Heart className="w-4 h-4" fill="#0A0E1A" />
+            Doar agora
+          </button>
+        </div>
       </div>
       </main>
+      <DonateSection />
       <Footer />
     </div>
   );
