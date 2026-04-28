@@ -214,7 +214,7 @@ export default function TeaserPage() {
               CNPJ 55.060.419/0001-20
             </p>
             <p style={{ fontSize: '13px', color: '#00D97E', fontWeight: 500, lineHeight: 1.8 }}>
-              contato@prontoia.com.br
+              contato@prontoia.wm3digital.com.br
             </p>
             <p style={{ fontSize: '13px', color: '#757994', lineHeight: 1.8 }}>
               prontoia.com.br
