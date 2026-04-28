@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Heart } from 'lucide-react';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
 import { DonateSection } from '@/components/DonateSection';
+import { DonateButton } from '@/components/DonateButton';
 
 export const metadata: Metadata = {
   title: 'Transparência — Pronto.IA',
@@ -58,16 +58,7 @@ export default function TransparenciaPage() {
 
         {/* Botão Doar — após Total Arrecadado */}
         <div className="text-center mt-6">
-          <button
-            onClick={() => {
-              const donateBtn = document.querySelector('[aria-label="Apoie o Pronto.IA"]');
-              if (donateBtn instanceof HTMLElement) donateBtn.click();
-            }}
-            className="inline-flex items-center gap-2 bg-[#00D97E] text-[#0A0E1A] px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform duration-240"
-          >
-            <Heart className="w-4 h-4" fill="#0A0E1A" />
-            Doar agora
-          </button>
+          <DonateButton />
         </div>
 
         {/* Tabela de Custos */}
@@ -108,16 +99,7 @@ export default function TransparenciaPage() {
 
         {/* Botão Doar — após Metas */}
         <div className="text-center mt-8">
-          <button
-            onClick={() => {
-              const donateBtn = document.querySelector('[aria-label="Apoie o Pronto.IA"]');
-              if (donateBtn instanceof HTMLElement) donateBtn.click();
-            }}
-            className="inline-flex items-center gap-2 bg-[#00D97E] text-[#0A0E1A] px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform duration-240"
-          >
-            <Heart className="w-4 h-4" fill="#0A0E1A" />
-            Doar agora
-          </button>
+          <DonateButton />
         </div>
       </div>
       </main>
