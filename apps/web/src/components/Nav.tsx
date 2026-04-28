@@ -15,25 +15,25 @@ export function Nav() {
         <div className="hidden items-center gap-8 md:flex">
           <Link
             href="/#trilhas"
-            className="text-body-s text-text-secondary hover:text-text-primary transition-duration-fast transition-colors"
+            className="text-body-s text-[#9DA1B4] hover:text-white transition-duration-fast transition-colors"
           >
             trilhas
           </Link>
           <Link
             href="/#para-empresas"
-            className="text-body-s text-text-secondary hover:text-text-primary transition-duration-fast transition-colors"
+            className="text-body-s text-[#9DA1B4] hover:text-white transition-duration-fast transition-colors"
           >
             para empresas
           </Link>
           <Link
             href="/sobre"
-            className="text-body-s text-text-secondary hover:text-text-primary transition-duration-fast transition-colors"
+            className="text-body-s text-[#9DA1B4] hover:text-white transition-duration-fast transition-colors"
           >
             sobre
           </Link>
           <Link
             href="/transparencia"
-            className="text-body-s text-text-secondary hover:text-text-primary transition-duration-fast transition-colors"
+            className="text-body-s text-[#9DA1B4] hover:text-white transition-duration-fast transition-colors"
           >
             transparência
           </Link>

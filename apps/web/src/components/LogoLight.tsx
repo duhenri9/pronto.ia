@@ -5,7 +5,7 @@ export function LogoLight() {
         <rect x="0" y="0" width="120" height="120" rx="32" fill="#00D97E" />
         <circle cx="60" cy="60" r="26" fill="#0B1929" />
       </svg>
-      <span className="font-display text-body-m font-medium tracking-heading text-neutral-900">
+      <span className="font-display text-body-m font-medium tracking-heading text-white">
         Pronto<span className="font-serif italic">.</span>IA
       </span>
     </div>
