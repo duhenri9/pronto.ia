@@ -42,6 +42,7 @@ export {
 export { certificates, certificatesRelations } from './certificates';
 export { outcomeReports, outcomeReportsRelations } from './outcomes';
 export { payments, paymentsRelations } from './payments';
+export { subscriptions, subscriptionsRelations } from './subscriptions';
 export { partners } from './partners';
 export { dailyMetrics, processedEvents } from './analytics';
 export { auditLogs, auditLogsRelations } from './audit';

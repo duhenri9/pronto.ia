@@ -19,6 +19,16 @@ export const verticalEnum = pgEnum('vertical', [
   'TECH_SERVICE',
 ]);
 
+export const lifecycleStateEnum = pgEnum('lifecycle_state', [
+  'provisional',
+  'onboarding',
+  'active',
+  'at_risk',
+  'churned',
+  'pro_offer_pending',
+  'awaiting_lgpd_confirmation',
+]);
+
 // ─── Trilha ───
 export const trilhaLevelEnum = pgEnum('trilha_level', [
   'BASIC',
@@ -125,4 +135,12 @@ export const scheduledMessageStatusEnum = pgEnum('scheduled_message_status', [
   'sent',
   'failed',
   'cancelled',
+]);
+
+// ─── Subscription ───
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'active',
+  'past_due',
+  'canceled',
+  'expired',
 ]);

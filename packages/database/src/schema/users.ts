@@ -14,13 +14,14 @@ import {
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
-import { userRoleEnum, verticalEnum } from './enums';
+import { userRoleEnum, verticalEnum, lifecycleStateEnum } from './enums';
 import {
   enrollments,
   lessonProgress,
   certificates,
   dailyCheckins,
   payments,
+  subscriptions,
   outcomeReports,
   auditLogs,
   whatsappSessions,
@@ -45,11 +46,20 @@ export const users = pgTable(
     // Business info for MEIs
     businessName: text('business_name'),
     businessType: text('business_type'),
+    businessContext: jsonb('business_context'),
     city: text('city'),
     state: text('state'),
 
+    // Display name (WhatsApp profile name or user-chosen)
+    displayName: text('display_name'),
+
     // Preferences
     preferredTime: text('preferred_time'), // "manhã", "tarde", "noite"
+    preferredContactWindow: text('preferred_contact_window'), // e.g. "09:00-18:00"
+
+    // Opt-ins
+    dailyLessonOptIn: boolean('daily_lesson_opt_in').default(false).notNull(),
+    reengagementOptIn: boolean('reengagement_opt_in').default(false).notNull(),
 
     // Onboarding
     onboardingCompletedAt: timestamp('onboarding_completed_at', { withTimezone: true }),
@@ -59,7 +69,12 @@ export const users = pgTable(
     // Pro subscription
     isPro: boolean('is_pro').default(false).notNull(),
     proExpiresAt: timestamp('pro_expires_at', { withTimezone: true }),
+    proOfferedAt: timestamp('pro_offered_at', { withTimezone: true }),
     stripeCustomerId: text('stripe_customer_id'),
+
+    // Lifecycle
+    lifecycleState: lifecycleStateEnum('lifecycle_state').default('provisional').notNull(),
+    pendingAction: text('pending_action'), // e.g. "awaiting_lgpd_confirmation", "pro_offer_pending"
 
     // LGPD compliance
     lgpdConsentAt: timestamp('lgpd_consent_at', { withTimezone: true }),
@@ -76,6 +91,7 @@ export const users = pgTable(
     index('idx_users_vertical').on(table.vertical),
     index('idx_users_is_pro').on(table.isPro),
     index('idx_users_deleted_at').on(table.deletedAt),
+    index('idx_users_lifecycle_state').on(table.lifecycleState),
   ],
 );
 
@@ -85,6 +101,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   progress: many(lessonProgress),
   dailyCheckins: many(dailyCheckins),
   payments: many(payments),
+  subscriptions: many(subscriptions),
   outcomeReports: many(outcomeReports),
   auditLogs: many(auditLogs),
   whatsappSession: one(whatsappSessions, {

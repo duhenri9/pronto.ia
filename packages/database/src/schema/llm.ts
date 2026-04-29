@@ -30,6 +30,7 @@ export const llmCalls = pgTable(
     // Model info
     model: text('model').notNull(), // e.g. "claude-haiku-4-5-20251001"
     persona: text('persona').notNull(), // maria, bia, leo, tiao, evaluator
+    promptVersion: text('prompt_version'), // e.g. "2025.04.1"
 
     // Input
     systemPromptHash: text('system_prompt_hash'),
