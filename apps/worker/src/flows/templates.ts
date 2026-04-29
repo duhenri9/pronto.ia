@@ -1,13 +1,15 @@
 // ============================================
-// PRONTO.IA — Message Templates
+// PRONTO.IA — Message Templates (Canonical)
 // ============================================
-// All WhatsApp messages for onboarding, Pro offer,
-// payment, renewal, cancellation and LGPD flows.
+// All WhatsApp messages organized by flow code.
 // Maria's voice: calorosa, direta, prática.
 // "Meu bem" is PROHIBITED — Maria é prima jovem, não tia.
+// Maria may paraphrase, but cannot change meaning, tone or structure.
 
 export const TEMPLATE = {
-  // ---- 3.1 Onboarding (OB-*) ----
+  // ============================================================
+  // 3.1 Onboarding (OB-*)
+  // ============================================================
 
   OB_01:
     'Oi! Eu sou a Maria. Antes da gente começar — pra eu poder te ajudar, preciso guardar seu nome e WhatsApp aqui comigo. Tudo bem? Você pode pedir pra eu apagar a qualquer hora, é só falar \'apaga tudo\'.',
@@ -42,94 +44,133 @@ export const TEMPLATE = {
   OB_11:
     'Tranquilo. Eu fico aqui quando você precisar. É só me chamar qualquer hora.',
 
-  // ---- 1.3 Pro Offer ----
+  // ============================================================
+  // 3.2 Camada gratuita (FREE-*)
+  // ============================================================
 
-  pro_offer_setup: (name: string) =>
-    `${name}, queria te contar uma novidade...`,
+  FREE_01: (name: string, lessonTitle: string, lessonBody: string) =>
+    `Bom dia, ${name}! Hoje a gente vai falar de: ${lessonTitle}.\n\n${lessonBody}\n\nFaz sentido?`,
 
-  pro_offer_pitch:
-    'Tenho uma amiga especialista que pode te ajudar todo dia com conteúdo avançado e suporte prioritário. O acesso é R$ 29/mês e você pode cancelar quando quiser. Quer conhecer?',
+  FREE_02:
+    'Tranquilo, sigo aqui. Quando quiser tentar aplicar, me chama.',
 
-  pro_accepted_acknowledge:
-    'Oba! Vou te mandar o link de pagamento. É rapidinho — Pix em 1 minuto!',
+  FREE_03:
+    'Demais! Conta como tá indo.',
 
-  pro_declined_graceful:
+  FREE_04:
+    'Acontece. O que travou?',
+
+  FREE_05: (genericAdvice: string) =>
+    `Olha, isso é especialidade da Bia, mas vou te dar uma dica geral: ${genericAdvice}. Bora testar e me conta o que veio?`,
+
+  // ============================================================
+  // 3.3 Oferta Pro (PRO-*)
+  // ============================================================
+
+  PRO_01:
+    'Posso te falar uma coisa?',
+
+  PRO_02:
+    'Você tá pronta pra um nível mais profundo. Tenho aqui o Pronto.IA Pro — R$ 29/mês, te dá acesso à Bia inteira, com trilha completa pro seu negócio. Pode cancelar quando quiser, sem pegadinha. Quer conhecer?',
+
+  PRO_03:
+    'Boa! Vou gerar o link de pagamento agora. Você prefere Pix imediato? (é o único método que aceito por enquanto)',
+
+  PRO_04:
     'Tranquilo. A gente segue do jeito que tá. Se mudar de ideia, é só me chamar.',
 
-  pro_unclear_ask_again:
-    'Desculpa, não entendi bem — você quer conhecer o plano Pro ou prefere continuar como está?',
+  PRO_05:
+    'Posso te ajudar a decidir? Me fala uma dúvida que tá rolando.',
 
-  // ---- 1.4 Payment ----
+  // ============================================================
+  // 3.4 Pagamento Abacate (PAY-*)
+  // ============================================================
 
-  payment_link: (url: string) =>
-    `Aqui está o link: ${url}\n\nO Pix expira em 1 hora. Qualquer coisa, é só me chamar!`,
+  PAY_01: (checkoutUrl: string) =>
+    `Aqui o link do Pix:\n\n${checkoutUrl}\n\nAssim que receber a confirmação, libero a Bia pra você. Demora poucos segundos.`,
 
-  payment_confirmed:
-    'Recebi seu pagamento! Bem-vinda ao Pronto.IA Pro! Agora você tem acesso à Bia, nossa especialista, com conteúdo avançado todo dia.',
+  PAY_02:
+    'Recebi! Tá tudo certo. Agora você tem acesso à Bia.',
 
-  payment_expired:
-    'Parece que o Pix expirou. Se ainda quiser assinar, me avisa que eu mando um link novo!',
+  PAY_03:
+    'Última coisa rapidinha — pra eu te mandar o recibo, qual seu email?',
 
-  payment_failed:
-    'Deu algum problema com o pagamento. Quer tentar de novo? Posso mandar um link novo.',
+  PAY_04:
+    'Hmm, esse email não tá certo. Me manda de novo?',
 
-  ask_email_for_receipt:
-    'Me passa seu email pra eu te mandar o recibo?',
+  PAY_05: (name: string) =>
+    `Anotado! Recibo já tá indo pro seu email. Vou te apresentar a Bia agora.`,
 
-  email_invalid_retry:
-    'Hmm, esse email não parece certo. Pode mandar de novo? Tipo: seunome@email.com',
+  PAY_06: (name: string) =>
+    `Bia, essa é ${name} — vai ser sua nova aluna. Toma conta dela, beleza?`,
 
-  email_received_handoff_to_bia:
-    'Pronto! Recibo enviado. Agora vou te apresentar a Bia — ela manja tudo do seu segmento e vai te ajudar a ir longe!',
+  PAY_07:
+    'O Pix de antes venceu. Quer que eu gere um novo?',
 
-  bia_first_introduction: (name: string) =>
-    `Oi ${name}! Eu sou a Bia, sua mentora especialista. Vou te mandar dicas e conteúdos avançados todo dia. Bora começar?`,
+  PAY_08:
+    'Algo travou no pagamento. Acontece. Quer tentar de novo?',
 
-  // ---- 1.5 Renewal ----
+  // ============================================================
+  // 3.5 Renovação (REN-*)
+  // ============================================================
 
-  renewal_reminder: (days: number) =>
-    days <= 0
-      ? 'Seu plano Pro venceu hoje. Quer renovar? É só me avisar!'
-      : days === 1
-        ? 'Seu plano Pro vence amanhã. Quer renovar pra não ficar sem a Bia?'
-        : `Seu plano Pro vence em ${days} dias. Quer renovar?`,
+  REN_01: (name: string, daysUntilExpiry: number) =>
+    `${name}, antes de tudo: tua mensalidade do Pro vence em ${daysUntilExpiry} dias. Quer renovar pelo Pix? Te mando o link.`,
 
-  renewal_link_generated:
-    'Aqui está o link de renovação! Mesmo valor, mesmo processo rápido.',
+  REN_02:
+    'Beleza, gerando o link agora.',
 
-  renewal_postponed:
-    'Beleza, sem pressão! Vou te lembrar de novo se você me chamar antes de vencer.',
+  REN_03:
+    'Tranquilo, sem pressa. Volto a falar nisso quando estiver perto do vencimento.',
 
-  renewal_declined_acknowledge:
-    'Entendi. Seu plano vai seguir ativo até o fim do período pago. Depois disso, eu continuo te ajudando normalmente!',
+  REN_04: (expiryDate: string) =>
+    `Entendi. A Bia fica disponível até ${expiryDate}. Depois disso eu continuo aqui contigo, mas a Bia some. Se mudar de ideia até lá, é só falar.`,
 
-  // ---- 1.6A Cancellation ----
+  REN_05:
+    'Oi! Vi que tua assinatura do Pro venceu. A Bia ficou indisponível, mas eu continuo aqui contigo de graça pra sempre. Se quiser voltar pro Pro, é só pedir.',
 
-  cancellation_confirm_ask:
-    'Posso confirmar — você quer cancelar o plano Pro?',
+  // ============================================================
+  // 3.6 Cancelamento (CAN-*)
+  // ============================================================
 
-  cancellation_ask_reason_optional:
-    'Se quiser me contar o motivo, ficaria grata pra melhorar. Mas pode dizer "prefiro não dizer" sem problema.',
+  CAN_01:
+    'Tem certeza? Posso cancelar agora. Antes, posso te perguntar uma coisa só? Só pra eu entender — o que aconteceu?',
 
-  cancellation_aborted:
-    'Que bom que ficou! A Bia continua à disposição.',
+  CAN_02: (expiryDate: string) =>
+    `Tá feito. A Bia fica disponível até ${expiryDate}. Eu fico aqui contigo, como sempre. Se mudar de ideia, é só falar.`,
 
-  cancellation_done: (expiry: string) =>
-    `Pronto, cancelamento feito. Seu plano Pro fica ativo até ${expiry}. Depois disso, eu (Maria) continuo te ajudando normalmente!`,
+  CAN_03: (expiryDate: string) =>
+    `Entendi. Tá cancelado. A Bia some a partir de ${expiryDate}. Eu fico aqui contigo, como sempre. Se mudar de ideia, é só falar.`,
 
-  // ---- 1.6B LGPD ----
+  CAN_04:
+    'Tranquilo, segue tudo igual. Se quiser cancelar mais pra frente, é só falar.',
 
-  lgpd_delete_confirm_ask:
-    'Entendo. Posso confirmar — você quer que eu apague todos os seus dados? Isso é permanente e não tem volta.',
+  // ============================================================
+  // 3.7 LGPD (LGPD-*)
+  // ============================================================
 
-  lgpd_delete_aborted:
-    'Ok, seus dados continuam seguros com a gente. Se mudar de ideia, é só falar.',
+  LGPD_01:
+    'Tem certeza? Eu vou apagar tudo: nossas conversas, seu progresso, certificados. Não dá pra desfazer. Quer mesmo?',
 
-  lgpd_delete_done:
-    'Tudo apagado. Foi um prazer te ajudar! Se um dia quiser voltar, é só me chamar de novo.',
+  LGPD_02:
+    'Tá feito. Sentirei sua falta. Se um dia voltar, é como se fosse a primeira vez.',
 
-  // ---- Post-cancellation ----
+  LGPD_03:
+    'Tranquilo, mantive tudo. Se mudar de ideia, é só falar \'apaga tudo\'.',
 
-  cancelled_first_contact:
-    'Oi! Seu plano Pro venceu, mas eu continuo aqui pra te ajudar com o conteúdo gratuito. Se quiser voltar pro Pro, é só me avisar!',
+  // ============================================================
+  // 3.8 Reconhecimento de outcome (OUT-*)
+  // ============================================================
+
+  OUT_01:
+    'Caraca, que orgulho! Conta como foi.',
+
+  OUT_02: (amount: string) =>
+    `${amount}? Demais. Como conseguiu?`,
+
+  OUT_03:
+    'Cliente nova fechada? Comemora aí, você merece.',
+
+  OUT_04:
+    'Anotado aqui. Você tá no caminho certo.',
 };

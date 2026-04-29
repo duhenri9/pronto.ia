@@ -101,7 +101,7 @@ export async function initiateCheckout(userId: string, type: 'initial' | 'renewa
     await outboundQueue.add('payment_link', {
       userId: user.id,
       phone: user.phone,
-      messageText: TEMPLATE.payment_link(checkout.url),
+      messageText: TEMPLATE.PAY_01(checkout.url),
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -122,7 +122,7 @@ export async function initiateCheckout(userId: string, type: 'initial' | 'renewa
     await outboundQueue.add('payment_error', {
       userId: user.id,
       phone: user.phone,
-      messageText: TEMPLATE.payment_failed,
+      messageText: TEMPLATE.PAY_08,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -226,7 +226,7 @@ export async function handleAbacateWebhook(
       await outboundQueue.add('payment_confirmed', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.payment_confirmed,
+        messageText: TEMPLATE.PAY_02,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -236,7 +236,7 @@ export async function handleAbacateWebhook(
       await outboundQueue.add('ask_email', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.ask_email_for_receipt,
+        messageText: TEMPLATE.PAY_03,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -258,7 +258,7 @@ export async function handleAbacateWebhook(
       await outboundQueue.add('payment_expired', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.payment_expired,
+        messageText: TEMPLATE.PAY_07,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -281,7 +281,7 @@ export async function handleAbacateWebhook(
       await outboundQueue.add('payment_failed_notify', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.payment_failed,
+        messageText: TEMPLATE.PAY_08,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -312,7 +312,7 @@ export async function handleEmailCapture(userId: string, message: string): Promi
     await outboundQueue.add('email_invalid', {
       userId,
       phone: user.phone,
-      messageText: TEMPLATE.email_invalid_retry,
+      messageText: TEMPLATE.PAY_04,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -332,7 +332,7 @@ export async function handleEmailCapture(userId: string, message: string): Promi
   await outboundQueue.add('email_handoff', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.email_received_handoff_to_bia,
+    messageText: TEMPLATE.PAY_05(user.displayName ?? user.name),
     messageType: 'text',
     persona: 'maria',
     sessionId: '',
@@ -342,7 +342,7 @@ export async function handleEmailCapture(userId: string, message: string): Promi
   await outboundQueue.add('bia_intro', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.bia_first_introduction(user.displayName ?? user.name),
+    messageText: TEMPLATE.PAY_06(user.displayName ?? user.name),
     messageType: 'text',
     persona: 'bia',
     sessionId: '',

@@ -86,7 +86,7 @@ export async function handleInboundWithPendingRenewal(
   await outboundQueue.add('renewal_reminder', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.renewal_reminder(daysUntilExpiry),
+    messageText: TEMPLATE.REN_01(user.displayName ?? user.name, daysUntilExpiry),
     messageType: 'text',
     persona: 'maria',
     sessionId: '',
@@ -138,12 +138,18 @@ export async function handleRenewalResponse(
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   if (!user) return;
 
+  // Fetch active subscription for expiry date
+  const [sub] = await db.select().from(subscriptions)
+    .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, 'active')))
+    .limit(1);
+  const expiryDate = sub?.currentPeriodEnd?.toLocaleDateString('pt-BR') ?? '';
+
   switch (intent) {
     case 'paid': {
       await outboundQueue.add('renewal_link', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.renewal_link_generated,
+        messageText: TEMPLATE.REN_02,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -158,7 +164,7 @@ export async function handleRenewalResponse(
       await outboundQueue.add('renewal_postponed', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.renewal_postponed,
+        messageText: TEMPLATE.REN_03,
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -175,7 +181,7 @@ export async function handleRenewalResponse(
       await outboundQueue.add('renewal_declined', {
         userId,
         phone: user.phone,
-        messageText: TEMPLATE.renewal_declined_acknowledge,
+        messageText: TEMPLATE.REN_04(expiryDate),
         messageType: 'text',
         persona: 'maria',
         sessionId: '',
@@ -269,7 +275,7 @@ export async function handleInboundWhenCancelled(
   await outboundQueue.add('cancelled_first_contact', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.cancelled_first_contact,
+    messageText: TEMPLATE.REN_05,
     messageType: 'text',
     persona: 'maria',
     sessionId: '',

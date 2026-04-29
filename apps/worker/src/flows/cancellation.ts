@@ -19,7 +19,7 @@ export async function handleCancellationRequest(userId: string): Promise<void> {
   await outboundQueue.add('cancellation_ask', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.cancellation_confirm_ask,
+    messageText: TEMPLATE.CAN_01,
     messageType: 'text',
     persona: 'maria',
     sessionId: '',
@@ -44,7 +44,7 @@ export async function handleCancellationConfirmation(
     await outboundQueue.add('cancellation_ask_reason', {
       userId,
       phone: user.phone,
-      messageText: TEMPLATE.cancellation_ask_reason_optional,
+      messageText: TEMPLATE.CAN_01,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -58,7 +58,7 @@ export async function handleCancellationConfirmation(
     await outboundQueue.add('cancellation_aborted', {
       userId,
       phone: user.phone,
-      messageText: TEMPLATE.cancellation_aborted,
+      messageText: TEMPLATE.CAN_04,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -116,7 +116,7 @@ export async function handleCancellationReason(
   await outboundQueue.add('cancellation_done', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.cancellation_done(expiryDate),
+    messageText: TEMPLATE.CAN_03(expiryDate),
     messageType: 'text',
     persona: 'maria',
     sessionId: '',
@@ -132,7 +132,7 @@ export async function handleLgpdDeleteRequest(userId: string): Promise<void> {
   await outboundQueue.add('lgpd_confirm_ask', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.lgpd_delete_confirm_ask,
+    messageText: TEMPLATE.LGPD_01,
     messageType: 'text',
     persona: 'maria',
     sessionId: '',
@@ -159,7 +159,7 @@ export async function handleLgpdConfirmation(
     await outboundQueue.add('lgpd_aborted', {
       userId,
       phone: user.phone,
-      messageText: TEMPLATE.lgpd_delete_aborted,
+      messageText: TEMPLATE.LGPD_03,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -178,7 +178,7 @@ export async function handleLgpdConfirmation(
   await outboundQueue.add('lgpd_done', {
     userId,
     phone: user.phone,
-    messageText: TEMPLATE.lgpd_delete_done,
+    messageText: TEMPLATE.LGPD_02,
     messageType: 'text',
     persona: 'maria',
     sessionId: '',

@@ -74,7 +74,7 @@ export async function offerPro(
   await outboundQueue.add('pro_offer_setup', {
     userId: user.id,
     phone: user.phone,
-    messageText: TEMPLATE.pro_offer_setup(displayName),
+    messageText: TEMPLATE.PRO_01,
     messageType: 'text',
     persona: 'maria',
     sessionId: '', // filled by outbound processor from session
@@ -86,7 +86,7 @@ export async function offerPro(
     {
       userId: user.id,
       phone: user.phone,
-      messageText: TEMPLATE.pro_offer_pitch,
+      messageText: TEMPLATE.PRO_02,
       messageType: 'text',
       persona: 'maria',
       sessionId: '',
@@ -162,15 +162,15 @@ export async function handleProResponse(
 
   switch (intent) {
     case 'accepted':
-      replyText = TEMPLATE.pro_accepted_acknowledge;
+      replyText = TEMPLATE.PRO_03;
       pendingAction = 'awaiting_payment';
       break;
     case 'declined':
-      replyText = TEMPLATE.pro_declined_graceful;
+      replyText = TEMPLATE.PRO_04;
       pendingAction = null;
       break;
     case 'unclear':
-      replyText = TEMPLATE.pro_unclear_ask_again;
+      replyText = TEMPLATE.PRO_05;
       // Keep pending_action as awaiting_pro_response
       pendingAction = 'awaiting_pro_response';
       break;
