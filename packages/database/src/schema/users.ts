@@ -70,6 +70,7 @@ export const users = pgTable(
     isPro: boolean('is_pro').default(false).notNull(),
     proExpiresAt: timestamp('pro_expires_at', { withTimezone: true }),
     proOfferedAt: timestamp('pro_offered_at', { withTimezone: true }),
+    proOfferBlockedUntil: timestamp('pro_offer_blocked_until', { withTimezone: true }),
     stripeCustomerId: text('stripe_customer_id'),
 
     // Lifecycle

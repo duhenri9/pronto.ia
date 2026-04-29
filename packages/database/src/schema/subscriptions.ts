@@ -33,6 +33,10 @@ export const subscriptions = pgTable(
 
     // Cancellation
     canceledAt: timestamp('canceled_at', { withTimezone: true }),
+    cancellationReason: text('cancellation_reason'),
+
+    // Track first message after cancellation (Maria explains)
+    lastMessageAfterCancellation: timestamp('last_message_after_cancellation', { withTimezone: true }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },

@@ -23,8 +23,10 @@ export const lifecycleStateEnum = pgEnum('lifecycle_state', [
   'provisional',
   'onboarding',
   'active',
-  'at_risk',
+  'active_pro',
+  'past_due',
   'churned',
+  'cancelled',
   'pro_offer_pending',
   'awaiting_lgpd_confirmation',
 ]);

@@ -25,8 +25,10 @@ export const payments = pgTable(
     amountCents: integer('amount_cents').notNull(),
     status: paymentStatusEnum('status').default('PENDING').notNull(),
     type: paymentTypeEnum('type').notNull(),
-    provider: paymentProviderEnum('provider').default('STRIPE').notNull(),
+    provider: paymentProviderEnum('provider').default('ABACATE').notNull(),
     providerId: text('provider_id'),
+    abacateCheckoutId: text('abacate_checkout_id'),
+    method: text('method'), // pix, card
     metadata: jsonb('metadata'),
 
     // Subscription
