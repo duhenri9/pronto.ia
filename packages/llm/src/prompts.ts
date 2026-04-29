@@ -35,6 +35,7 @@ export interface LoadedPrompt {
 }
 
 export interface UserContext {
+  // ---- Maria dynamic fields ----
   preferred_name?: string;
   lifecycle_state?: string;
   pending_action?: string;
@@ -46,9 +47,20 @@ export interface UserContext {
   last_active_at?: string;
   relevant_memories?: string;
   conversation_history?: string;
-  // Legacy fields kept for backwards compat with other persona prompts
+  // ---- Bia dynamic fields ----
   display_name?: string;
+  handoff_context?: string;
   current_track?: string;
+  current_lesson_position?: string;
+  total_lessons?: string;
+  // ---- Evaluator dynamic fields ----
+  lesson_objective?: string;
+  lesson_success_criteria?: string;
+  user_submission?: string;
+  recent_outcomes?: string;
+  // ---- Intent classifier dynamic fields ----
+  user_message?: string;
+  // ---- Legacy fields ----
   current_lesson?: string;
   [key: string]: string | undefined;
 }

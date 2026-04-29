@@ -5,18 +5,26 @@
 // 1. Regex patterns (fast, free, ~75% coverage)
 // 2. Gemini Flash (for ambiguous messages, ~25%)
 // 3. Fallback: 'question_general' handled by Haiku 4.5
+//
+// Canonical categories defined in prompts/router/intent-classifier.md
 
 // ---- Intent Types ----
 
 export type Intent =
-  | 'command_lgpd_delete'
   | 'greeting'
+  | 'question_general'
+  | 'question_vertical'
   | 'command_admin'
-  | 'exercise_submitted'
+  | 'command_lgpd_delete'
   | 'outcome_report'
+  | 'pro_offer_response'
+  | 'cancellation_request'
+  | 'payment_response'
+  | 'unclear'
+  // Legacy aliases kept for backwards compat
   | 'pro_offer_accepted'
   | 'pro_offer_declined'
-  | 'question_general'
+  | 'exercise_submitted'
   | 'chat';
 
 export interface IntentResult {
@@ -71,6 +79,22 @@ const PATTERNS: PatternRule[] = [
     pattern: /^\/(progresso|certificado|conta|ajuda|menu|parar)/i,
   },
 
+  // Cancellation request
+  {
+    intent: 'cancellation_request',
+    pattern: /(quero\s+)?cancelar(\s+o\s+pro|\s+plano|\s+assinatura)?/i,
+  },
+  {
+    intent: 'cancellation_request',
+    pattern: /cancela\s+(tudo|o\s+pro)/i,
+  },
+
+  // Payment response
+  {
+    intent: 'payment_response',
+    pattern: /(já\s+paguei|fiz\s+o\s+pagamento|comprovante|pagamento\s+confirmado|vou\s+pagar)/i,
+  },
+
   // Exercise submitted
   {
     intent: 'exercise_submitted',
@@ -80,16 +104,22 @@ const PATTERNS: PatternRule[] = [
   // Outcome report
   {
     intent: 'outcome_report',
-    pattern: /(resultado|consegui|aumentei|melhorei|cresceu|faturei|receita|lucro)/i,
+    pattern: /(resultado|consegui|aumentei|melhorei|cresceu|faturei|receita|lucro|dei\s+certo|fechei\s+venda)/i,
+  },
+
+  // Vertical questions
+  {
+    intent: 'question_vertical',
+    pattern: /(salão|cabeleireiro|manicure|estética|restaurante|lanchonete|food|conserto|reparo)/i,
   },
 
   // Pro offer accepted
   {
-    intent: 'pro_offer_accepted',
+    intent: 'pro_offer_response',
     pattern: /^(sim|quero|bora|pode\s+ser|com\s+certeza|claro|fechou|vamos\s+nisso)[\s!.,]*$/i,
   },
   {
-    intent: 'pro_offer_accepted',
+    intent: 'pro_offer_response',
     pattern: /(quero\s+conhecer|quero\s+o\s+pro|assin|pagar)/i,
   },
 
@@ -126,9 +156,24 @@ export function tryRegexClassify(message: string): IntentResult | null {
   return null;
 }
 
+// ---- Canonical intent list for Gemini ----
+
+const CANONICAL_INTENTS = [
+  'greeting',
+  'question_general',
+  'question_vertical',
+  'command_admin',
+  'command_lgpd_delete',
+  'outcome_report',
+  'pro_offer_response',
+  'cancellation_request',
+  'payment_response',
+  'unclear',
+] as const;
+
 // ---- Gemini Flash Classifier ----
 
-async function geminiClassify(message: string): Promise<IntentResult> {
+async function geminiClassify(message: string, lifecycleState?: string): Promise<IntentResult> {
   const apiKey = process.env.GOOGLE_AI_API_KEY;
 
   if (!apiKey) {
@@ -141,6 +186,9 @@ async function geminiClassify(message: string): Promise<IntentResult> {
   }
 
   try {
+    const intentList = CANONICAL_INTENTS.join(', ');
+    const stateInfo = lifecycleState ? `\nEstado do usuário: ${lifecycleState}` : '';
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
@@ -149,9 +197,9 @@ async function geminiClassify(message: string): Promise<IntentResult> {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `Classifique a intenção desta mensagem de WhatsApp de um MEI brasileiro. Responda APENAS com um dos seguintes intents: command_lgpd_delete, greeting, command_admin, exercise_submitted, outcome_report, pro_offer_accepted, pro_offer_declined, question_general, chat
+              text: `Classifique a intenção desta mensagem de WhatsApp de um MEI brasileiro. Responda APENAS com um dos seguintes intents: ${intentList}
 
-Mensagem: "${message}"
+Mensagem: "${message}"${stateInfo}
 
 Intent:`,
             }],
@@ -171,16 +219,20 @@ Intent:`,
     const data: any = await response.json();
     const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
 
-    const validIntents: Intent[] = [
-      'command_lgpd_delete', 'greeting', 'command_admin', 'exercise_submitted',
-      'outcome_report', 'pro_offer_accepted', 'pro_offer_declined',
-      'question_general', 'chat',
+    // Match against canonical intents + legacy aliases
+    const allValidIntents: Intent[] = [
+      ...CANONICAL_INTENTS,
+      'pro_offer_accepted', 'pro_offer_declined', 'exercise_submitted', 'chat',
     ];
 
-    const matched = validIntents.find((i) => text.includes(i));
+    const matched = allValidIntents.find((i) => text.includes(i));
+
+    // Map pro_offer_response subtypes
+    let finalIntent: Intent = matched ?? 'unclear';
+    if (finalIntent === 'pro_offer_accepted') finalIntent = 'pro_offer_response';
 
     return {
-      intent: matched ?? 'question_general',
+      intent: finalIntent,
       confidence: matched ? 'medium' : 'low',
       source: 'gemini',
     };
@@ -209,12 +261,12 @@ export async function classifyIntent(
   if (regexResult) return regexResult;
 
   // 2. Try Gemini Flash for ambiguous messages
-  const geminiResult = await geminiClassify(message);
+  const geminiResult = await geminiClassify(message, lifecycleState);
   if (geminiResult.confidence !== 'low') return geminiResult;
 
-  // 3. Fallback: question_general (handled by Haiku 4.5)
+  // 3. Fallback: unclear
   return {
-    intent: 'question_general',
+    intent: 'unclear',
     confidence: 'low',
     source: 'fallback',
   };

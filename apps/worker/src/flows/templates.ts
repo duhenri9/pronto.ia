@@ -1,12 +1,47 @@
 // ============================================
-// PRONTO.IA — Message Templates for Pro Flows
+// PRONTO.IA — Message Templates
 // ============================================
-// All WhatsApp messages for Pro offer, payment,
-// renewal, cancellation and LGPD flows.
-// Maria's voice: acolhedor, direto, prático.
-// "Meu bem" is neutral and always works.
+// All WhatsApp messages for onboarding, Pro offer,
+// payment, renewal, cancellation and LGPD flows.
+// Maria's voice: calorosa, direta, prática.
+// "Meu bem" is PROHIBITED — Maria é prima jovem, não tia.
 
 export const TEMPLATE = {
+  // ---- 3.1 Onboarding (OB-*) ----
+
+  OB_01:
+    'Oi! Eu sou a Maria. Antes da gente começar — pra eu poder te ajudar, preciso guardar seu nome e WhatsApp aqui comigo. Tudo bem? Você pode pedir pra eu apagar a qualquer hora, é só falar \'apaga tudo\'.',
+
+  OB_02:
+    'Sem problema! Sem você guardando comigo aqui, não consigo te ajudar de verdade. Mas se mudar de ideia, é só me chamar.',
+
+  OB_03:
+    'Boa pergunta! Eu guardo só seu nome e WhatsApp pra te reconhecer e te chamar pelo nome. Você pode apagar tudo a qualquer hora falando \'apaga tudo\'. Topa?',
+
+  OB_04:
+    'Beleza! Como você gosta de ser chamada?',
+
+  OB_05: (name: string) =>
+    `Prazer, ${name}! Me conta em duas linhas: o que você faz da vida?`,
+
+  OB_06:
+    'Aaah, salão! Adorei. Vou poder te ajudar bastante com isso.',
+
+  OB_07: (vertical: string) =>
+    `Ainda tô aprendendo a ajudar com ${vertical}. Por enquanto trabalho melhor com salão de beleza. Mas a gente pode conversar sobre IA em geral, e quando eu expandir, te aviso. Te ajuda assim?`,
+
+  OB_08:
+    'Última coisa antes da gente seguir: posso te chamar uma vez por dia com uma dica rápida de 5 minutos? Se preferir, eu fico só respondendo quando você me chamar. Como prefere?',
+
+  OB_09:
+    'Beleza! Que horário fica bom pra você? Manhã, tarde ou noite?',
+
+  OB_10: (window: string) =>
+    `Tá tudo combinado. Vou te chamar de ${window}. E quando você precisar, é só me chamar qualquer hora também.`,
+
+  OB_11:
+    'Tranquilo. Eu fico aqui quando você precisar. É só me chamar qualquer hora.',
+
   // ---- 1.3 Pro Offer ----
 
   pro_offer_setup: (name: string) =>
@@ -16,10 +51,10 @@ export const TEMPLATE = {
     'Tenho uma amiga especialista que pode te ajudar todo dia com conteúdo avançado e suporte prioritário. O acesso é R$ 29/mês e você pode cancelar quando quiser. Quer conhecer?',
 
   pro_accepted_acknowledge:
-    'Oba! Vou te mandar o link de pagamento. É rapidinho —Pix em 1 minuto! 🎉',
+    'Oba! Vou te mandar o link de pagamento. É rapidinho — Pix em 1 minuto!',
 
   pro_declined_graceful:
-    'Tudo bem, sem pressão! Eu continuo aqui pra te ajudar sempre que precisar. 😊',
+    'Tranquilo. A gente segue do jeito que tá. Se mudar de ideia, é só me chamar.',
 
   pro_unclear_ask_again:
     'Desculpa, não entendi bem — você quer conhecer o plano Pro ou prefere continuar como está?',
@@ -30,7 +65,7 @@ export const TEMPLATE = {
     `Aqui está o link: ${url}\n\nO Pix expira em 1 hora. Qualquer coisa, é só me chamar!`,
 
   payment_confirmed:
-    'Recebi seu pagamento! Bem-vinda ao Pronto.IA Pro! 🎉 Agora você tem acesso à Bia, nossa especialista, com conteúdo avançado todo dia.',
+    'Recebi seu pagamento! Bem-vinda ao Pronto.IA Pro! Agora você tem acesso à Bia, nossa especialista, com conteúdo avançado todo dia.',
 
   payment_expired:
     'Parece que o Pix expirou. Se ainda quiser assinar, me avisa que eu mando um link novo!',
@@ -66,7 +101,7 @@ export const TEMPLATE = {
     'Beleza, sem pressão! Vou te lembrar de novo se você me chamar antes de vencer.',
 
   renewal_declined_acknowledge:
-    'Entendi. Seu plano vai seguir ativo até o fim do período pago. Depois, eu continuo te ajudando normalmente!',
+    'Entendi. Seu plano vai seguir ativo até o fim do período pago. Depois disso, eu continuo te ajudando normalmente!',
 
   // ---- 1.6A Cancellation ----
 
@@ -77,7 +112,7 @@ export const TEMPLATE = {
     'Se quiser me contar o motivo, ficaria grata pra melhorar. Mas pode dizer "prefiro não dizer" sem problema.',
 
   cancellation_aborted:
-    'Que bom que ficou! A Bia continua à disposição. 😊',
+    'Que bom que ficou! A Bia continua à disposição.',
 
   cancellation_done: (expiry: string) =>
     `Pronto, cancelamento feito. Seu plano Pro fica ativo até ${expiry}. Depois disso, eu (Maria) continuo te ajudando normalmente!`,
