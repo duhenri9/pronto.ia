@@ -13,6 +13,7 @@ import { Queue } from 'bullmq';
 import { createWhatsAppProvider } from '@pronto-ia/whatsapp';
 import type { ParsedWebhookEvent } from '@pronto-ia/whatsapp';
 import { getRedisConnection } from '@/lib/redis';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // BullMQ queue — same name as worker's inboundQueue
 const inboundQueue = new Queue('whatsapp.inbound', {
@@ -84,8 +85,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ status: 'no_messages' });
   }
 
-  // 6. Enqueue each message as a BullMQ job
+  // 6. Rate limit + enqueue each message
+  let queued = 0;
+  let rateLimited = 0;
+
   for (const event of messageEvents) {
+    // Rate limit check per phone
+    const allowed = await checkRateLimit(event.phone);
+    if (!allowed) {
+      rateLimited++;
+      continue;
+    }
+
     await inboundQueue.add(
       'inbound-message',
       {
@@ -106,11 +117,12 @@ export async function POST(request: NextRequest) {
         removeOnFail: { age: 24 * 3600 },
       },
     );
+    queued++;
   }
 
   // 7. Respond immediately — do NOT wait for LLM processing
   return NextResponse.json(
-    { status: 'queued', count: messageEvents.length },
-    { status: 202 },
+    { status: 'queued', count: queued, rateLimited },
+    { status: rateLimited > 0 && queued === 0 ? 429 : 202 },
   );
 }
