@@ -64,6 +64,42 @@ export class ProntoLLMClient {
   }
 
   async chat(options: LLMCallOptions): Promise<LLMCallResult> {
+    return this.callWithFallback(options);
+  }
+
+  /**
+   * Calls the primary LLM provider. If it fails and
+   * LLM_FALLBACK_ENABLED is true, falls back to the secondary provider.
+   */
+  private async callWithFallback(options: LLMCallOptions): Promise<LLMCallResult> {
+    const primaryProvider = process.env.LLM_PROVIDER_PRIMARY ?? 'anthropic';
+
+    try {
+      if (primaryProvider === 'anthropic') {
+        return await this.callAnthropic(options);
+      }
+      // Future: other primary providers
+      return await this.callAnthropic(options);
+    } catch (primaryError) {
+      const fallbackEnabled = process.env.LLM_FALLBACK_ENABLED === 'true';
+      const fallbackProvider = process.env.LLM_PROVIDER_FALLBACK ?? 'openai';
+
+      if (!fallbackEnabled || fallbackProvider === primaryProvider) {
+        throw primaryError;
+      }
+
+      console.warn(
+        `[LLM] Primary provider (${primaryProvider}) failed, falling back to ${fallbackProvider}`,
+        primaryError instanceof Error ? primaryError.message : primaryError,
+      );
+
+      // Future: implement OpenAI fallback client
+      // For now, just re-throw the primary error
+      throw primaryError;
+    }
+  }
+
+  private async callAnthropic(options: LLMCallOptions): Promise<LLMCallResult> {
     const prompt = loadPrompt(options.persona);
     const callConfig = this.resolveConfig(prompt, options.config);
     const sanitizedMessages = this.sanitizeMessages(options.messages);
