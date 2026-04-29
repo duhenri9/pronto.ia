@@ -7,6 +7,7 @@
 
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
+import * as Sentry from '@sentry/node';
 import { db, eq, desc } from '@pronto-ia/database';
 import {
   users,
@@ -218,6 +219,9 @@ export const inboundWorker = new Worker<InboundJobData>(
 
 inboundWorker.on('failed', (job, err) => {
   console.error(`[INBOUND] Job ${job?.id} failed:`, err.message);
+  Sentry.captureException(err, {
+    extra: { jobId: job?.id, jobData: job?.data },
+  });
 });
 
 inboundWorker.on('completed', (job) => {

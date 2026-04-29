@@ -5,6 +5,7 @@
 // starts BullMQ workers for inbound/outbound/scheduled queues.
 
 import './env';
+import './instrumentation';
 import { initPromptsDir } from './prompts-loader';
 import { inboundQueue, outboundQueue, scheduledQueue, closeQueues } from './queues';
 import { inboundWorker, closeInboundWorker } from './processors/inbound';

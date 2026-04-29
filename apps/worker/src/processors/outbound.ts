@@ -7,6 +7,7 @@
 
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
+import * as Sentry from '@sentry/node';
 import { db, eq, whatsappMessages } from '@pronto-ia/database';
 import { createWhatsAppProvider } from '@pronto-ia/whatsapp';
 import type { SendMessageResult } from '@pronto-ia/whatsapp';
@@ -113,6 +114,9 @@ export const outboundWorker = new Worker<OutboundJobData>(
 
 outboundWorker.on('failed', (job, err) => {
   console.error(`[OUTBOUND] Job ${job?.id} failed:`, err.message);
+  Sentry.captureException(err, {
+    extra: { jobId: job?.id, jobData: job?.data },
+  });
 });
 
 outboundWorker.on('completed', (job) => {

@@ -29,13 +29,15 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 | Frontend + API | **Next.js 15** App Router | apps/web |
 | ORM | **Drizzle ORM** + postgres.js | packages/database |
 | Auth | **jose** (HS256 JWT) | packages/auth · tech debt reconhecido |
-| LLM | **Anthropic Claude** (Haiku 4.5 / Sonnet 4.5) | packages/llm · API key direta |
-| WhatsApp | **Meta Cloud API** (produção) / **Z-API** (pilot) | packages/whatsapp · factory pattern |
-| DB | **PostgreSQL 16** | docker-compose.dev.yml |
-| Queue | **Redis 7** + **BullMQ** | apps/worker · hosted on Railway (ADR-0011) |
-| Types | **Zod** + TypeScript strict | packages/types |
-| Events | Typed EventEmitter | packages/events |
-| Monitoring | **Sentry** | apps/web · plan grátis (5k errors/month) |
+| LLM | **Anthropic Claude** (Haiku 4.5 / Sonnet 4.5) | packages/llm |
+| WhatsApp | **Z-API** (provider primário) | packages/whatsapp |
+| Pagamento | **AbacatePay** (Pix + Cartão) | Phase 3 |
+| DB | **PostgreSQL 16** (Neon, região sa-east-1) | packages/database |
+| Queue | **Redis 7** + **BullMQ** | apps/worker · Railway |
+| Infra Web | **Vercel** | Deploy via git push |
+| Infra Worker | **Railway** | Processos persistentes + Redis nativo |
+| Monorepo | **pnpm** + **Turborepo** | |
+| Observabilidade | **Sentry** | Web + Worker |
 
 ## Architecture
 

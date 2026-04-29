@@ -17,6 +17,7 @@
     "@pronto-ia/llm": "workspace:*",
     "@pronto-ia/types": "workspace:*",
     "@pronto-ia/whatsapp": "workspace:*",
+    "@sentry/node": "^10.51.0",
     "bullmq": "^5.13.0",
     "dotenv": "^16.4.0",
     "drizzle-orm": "^0.44.0",
