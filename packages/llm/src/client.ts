@@ -42,6 +42,11 @@ const DEFAULT_CONFIG: LLMConfig = {
   temperature: 0.7,
 };
 
+// ---- Constants ----
+
+/** Max characters for inbound user messages — longer texts are truncated */
+const MAX_INBOUND_LENGTH = 2000;
+
 export class ProntoLLMClient {
   private client: Anthropic;
   private defaultConfig: LLMConfig;
@@ -49,6 +54,7 @@ export class ProntoLLMClient {
   constructor(config?: { apiKey?: string; defaultConfig?: Partial<LLMConfig> }) {
     this.client = new Anthropic({
       apiKey: config?.apiKey ?? process.env.ANTHROPIC_API_KEY,
+      timeout: 25000, // 25s timeout per Anthropic request
     });
 
     this.defaultConfig = {
@@ -62,13 +68,30 @@ export class ProntoLLMClient {
     const callConfig = this.resolveConfig(prompt, options.config);
     const sanitizedMessages = this.sanitizeMessages(options.messages);
 
+    // Build system prompt array with cache_control on basePrompt
+    const system: Array<{ type: 'text'; text: string; cache_control?: { type: 'ephemeral' } }> = [
+      {
+        type: 'text',
+        text: prompt.basePrompt,
+        cache_control: { type: 'ephemeral' },
+      },
+    ];
+
+    // Dynamic context is NOT cached (changes per user/session)
+    if (prompt.dynamicContext) {
+      system.push({
+        type: 'text',
+        text: prompt.dynamicContext,
+      });
+    }
+
     const startTime = Date.now();
 
     const response = await this.client.messages.create({
       model: callConfig.model,
       max_tokens: callConfig.maxTokens,
       temperature: callConfig.temperature,
-      system: prompt.systemPrompt,
+      system,
       messages: sanitizedMessages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -143,9 +166,16 @@ export class ProntoLLMClient {
   private sanitizeMessages(messages: ChatMessage[]): ChatMessage[] {
     return messages.map((m) => {
       const inputCheck = validateInput(m.content);
+      let content = inputCheck.sanitized ?? sanitizeUserMessage(m.content);
+
+      // Truncate inbound user messages that exceed MAX_INBOUND_LENGTH
+      if (m.role === 'user' && content.length > MAX_INBOUND_LENGTH) {
+        content = content.substring(0, MAX_INBOUND_LENGTH) + '... [truncado]';
+      }
+
       return {
         role: m.role,
-        content: inputCheck.sanitized ?? sanitizeUserMessage(m.content),
+        content,
       };
     });
   }

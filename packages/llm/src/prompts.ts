@@ -16,6 +16,11 @@ export interface LoadedPrompt {
   model: string;
   language: string;
   fallbackMessage: string;
+  /** Cacheable part of the system prompt (sent with cache_control: ephemeral) */
+  basePrompt: string;
+  /** Dynamic per-user context (NOT cached — changes per conversation) */
+  dynamicContext: string;
+  /** Full system prompt (basePrompt + dynamicContext) — kept for backwards compat */
   systemPrompt: string;
 }
 
@@ -42,9 +47,9 @@ function parseFrontmatter(raw: string): { meta: Record<string, string>; body: st
   return { meta, body: match[2].trim() };
 }
 
-export function loadPrompt(persona: string): LoadedPrompt {
+export function loadPrompt(persona: string, userContext?: Record<string, string>): LoadedPrompt {
   const cached = cache.get(persona);
-  if (cached) return cached;
+  if (cached && !userContext) return cached;
 
   const filename = `${persona}.md`;
   const filepath = join(getPromptsDir(), filename);
@@ -56,6 +61,28 @@ export function loadPrompt(persona: string): LoadedPrompt {
   const raw = readFileSync(filepath, 'utf-8');
   const { meta, body } = parseFrontmatter(raw);
 
+  // Split by ---DYNAMIC--- marker for prompt caching
+  const DYNAMIC_MARKER = '---DYNAMIC---';
+  let basePrompt: string;
+  let dynamicContext: string;
+
+  if (body.includes(DYNAMIC_MARKER)) {
+    const parts = body.split(DYNAMIC_MARKER);
+    basePrompt = parts[0].trim();
+    dynamicContext = parts.slice(1).join(DYNAMIC_MARKER).trim();
+  } else {
+    // No marker — entire body is base (cacheable)
+    basePrompt = body;
+    dynamicContext = '';
+  }
+
+  // Fill template placeholders in dynamicContext with userContext
+  if (userContext && dynamicContext) {
+    for (const [key, value] of Object.entries(userContext)) {
+      dynamicContext = dynamicContext.replaceAll(`{{${key}}}`, value);
+    }
+  }
+
   const prompt: LoadedPrompt = {
     version: meta.version ?? '0.0.0',
     persona: meta.persona ?? persona,
@@ -65,10 +92,16 @@ export function loadPrompt(persona: string): LoadedPrompt {
     model: meta.model ?? 'claude-haiku-4-5-20251001',
     language: meta.language ?? 'pt-BR',
     fallbackMessage: meta.fallback_message ?? 'Pode repetir, por favor? Deu um pequeno problema técnico aqui.',
-    systemPrompt: body,
+    basePrompt,
+    dynamicContext,
+    systemPrompt: dynamicContext ? `${basePrompt}\n\n${dynamicContext}` : basePrompt,
   };
 
-  cache.set(persona, prompt);
+  // Cache only the base prompt (without user-specific context)
+  if (!userContext) {
+    cache.set(persona, prompt);
+  }
+
   return prompt;
 }
 
