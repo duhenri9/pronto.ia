@@ -20,6 +20,7 @@ export type Intent =
   | 'pro_offer_response'
   | 'cancellation_request'
   | 'payment_response'
+  | 'reactivation_request'
   | 'unclear'
   // Legacy aliases kept for backwards compat
   | 'pro_offer_accepted'
@@ -128,6 +129,16 @@ const PATTERNS: PatternRule[] = [
     intent: 'pro_offer_declined',
     pattern: /^(não|nao|depois|agora\s+não|nao\s+agora|talvez\s+depois|obrigad[oa])[\s!.,]*$/i,
   },
+
+  // Pro reactivation (cancelled user wants back)
+  {
+    intent: 'reactivation_request',
+    pattern: /(quero\s+voltar\s+pro|reativar|assinar\s+de\s+novo|quero\s+a\s+bia\s+de\s+volta|voltar\s+pro\s+pro|quero\s+o\s+pro\s+de\s+novo)/i,
+  },
+  {
+    intent: 'reactivation_request',
+    pattern: /(quero\s+voltar|voltar\s+pra\s+bia|quero\s+a\s+bia|assinar\s+novamente)/i,
+  },
 ];
 
 // ---- Lifecycle states that skip intent classification ----
@@ -168,6 +179,7 @@ const CANONICAL_INTENTS = [
   'pro_offer_response',
   'cancellation_request',
   'payment_response',
+  'reactivation_request',
   'unclear',
 ] as const;
 

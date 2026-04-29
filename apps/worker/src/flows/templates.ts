@@ -44,6 +44,12 @@ export const TEMPLATE = {
   OB_11:
     'Tranquilo. Eu fico aqui quando você precisar. É só me chamar qualquer hora.',
 
+  OB_12:
+    'Como você gosta de ser chamada? Pode ser primeiro nome, apelido, como quiser.',
+
+  OB_13: (fallbackName: string) =>
+    `Beleza, ${fallbackName}! Me conta em duas linhas: o que você faz da vida?`,
+
   // ============================================================
   // 3.2 Camada gratuita (FREE-*)
   // ============================================================
@@ -110,6 +116,9 @@ export const TEMPLATE = {
   PAY_08:
     'Algo travou no pagamento. Acontece. Quer tentar de novo?',
 
+  PAY_09:
+    'O Pix que te mandei antes expirou. Quer que eu gere um novo?',
+
   // ============================================================
   // 3.5 Renovação (REN-*)
   // ============================================================
@@ -128,6 +137,13 @@ export const TEMPLATE = {
 
   REN_05:
     'Oi! Vi que tua assinatura do Pro venceu. A Bia ficou indisponível, mas eu continuo aqui contigo de graça pra sempre. Se quiser voltar pro Pro, é só pedir.',
+
+  // ============================================================
+  // 3.9 Reativação (REA-*)
+  // ============================================================
+
+  REA_01: (name: string) =>
+    `${name}, que bom ter você de volta! Te mando o link de pagamento agora mesmo. R$ 29/mês, com a Bia e tudo que você já conhece. Sem pegadinha.`,
 
   // ============================================================
   // 3.6 Cancelamento (CAN-*)

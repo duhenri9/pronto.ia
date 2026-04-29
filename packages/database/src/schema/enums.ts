@@ -29,6 +29,7 @@ export const lifecycleStateEnum = pgEnum('lifecycle_state', [
   'cancelled',
   'pro_offer_pending',
   'awaiting_lgpd_confirmation',
+  'deleted',
 ]);
 
 // ─── Trilha ───

@@ -4,7 +4,7 @@
 // Handles voluntary Pro cancellation and
 // LGPD right-to-erasure (anonymization).
 
-import { db, eq, users, subscriptions, auditLogs } from '@pronto-ia/database';
+import { db, eq, and, users, subscriptions, auditLogs } from '@pronto-ia/database';
 import { outboundQueue } from '../queues';
 import type { OutboundJobData } from '../queues';
 import { TEMPLATE } from './templates';
@@ -209,23 +209,25 @@ export async function lgpdAnonymizeWorker(userId: string): Promise<void> {
   const crypto = require('crypto');
   const hashedPhone = crypto.createHash('sha256').update(user.phone).digest('hex');
 
-  // Anonymize user record
-  await db.update(users).set({
-    name: '[deleted]',
-    displayName: null,
-    email: null,
-    phone: hashedPhone,
-    businessName: null,
-    businessType: null,
-    businessContext: null,
-    onboardingData: {},
-    dailyLessonOptIn: false,
-    reengagementOptIn: false,
-    deletedAt: new Date(),
-    lifecycleState: 'cancelled',
-    pendingAction: null,
-    updatedAt: new Date(),
-  }).where(eq(users.id, userId));
+  // Anonymize user record within transaction (atomicity per spec 1.6.B)
+  await db.transaction(async (tx) => {
+    await tx.update(users).set({
+      name: '[deleted]',
+      displayName: null,
+      email: null,
+      phone: hashedPhone,
+      businessName: null,
+      businessType: null,
+      businessContext: null,
+      onboardingData: {},
+      dailyLessonOptIn: false,
+      reengagementOptIn: false,
+      deletedAt: new Date(),
+      lifecycleState: 'deleted',
+      pendingAction: null,
+      updatedAt: new Date(),
+    }).where(eq(users.id, userId));
+  });
 
   // Audit log
   await db.insert(auditLogs).values({
@@ -239,6 +241,3 @@ export async function lgpdAnonymizeWorker(userId: string): Promise<void> {
 
   console.log(`[LGPD] User ${userId} anonymized. Hashed phone: ${hashedPhone.substring(0, 16)}...`);
 }
-
-// Need to import `and` for the cancellation query
-import { and } from '@pronto-ia/database';

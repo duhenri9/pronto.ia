@@ -20,6 +20,7 @@ Classifique a mensagem do usuário em UMA das categorias abaixo. Responda APENAS
 - `pro_offer_response`: resposta a uma oferta de Pro (sim/não/talvez)
 - `cancellation_request`: pedido pra cancelar Pro
 - `payment_response`: resposta sobre pagamento (já paguei, vou pagar, etc)
+- `reactivation_request`: ex-assinante quer voltar ao Pro ("quero voltar", "reativar", "assinar de novo", "quero a Bia")
 - `unclear`: não dá pra classificar com segurança
 
 # REGRAS
@@ -40,6 +41,7 @@ Classifique a mensagem do usuário em UMA das categorias abaixo. Responda APENAS
 "não obrigada" → pro_offer_response
 "quero cancelar" → cancellation_request
 "já paguei" → payment_response
+"quero voltar pro Pro" → reactivation_request
 "ok" → unclear
 
 ---DYNAMIC---

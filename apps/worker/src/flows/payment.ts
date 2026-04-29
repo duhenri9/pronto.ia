@@ -354,3 +354,166 @@ export async function handleEmailCapture(userId: string, message: string): Promi
 
   return true;
 }
+
+// ---- Gap 2: Abacate Reconciliation (24h check) ----
+
+/**
+ * Checks AbacatePay API directly for payment status.
+ * Used when user says "paguei, e agora?" but webhook didn't arrive.
+ */
+export async function checkAbacatePaymentStatus(checkoutId: string): Promise<'confirmed' | 'pending' | 'expired' | 'unknown'> {
+  const apiKey = process.env.ABACATE_PAY_API_KEY;
+  if (!apiKey) return 'unknown';
+
+  try {
+    const response = await fetch(`https://api.abacatepay.com/v1/checkout/${checkoutId}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+      },
+    });
+
+    if (!response.ok) return 'unknown';
+
+    const data: any = await response.json();
+    const status: string = data.status ?? data.data?.status ?? '';
+
+    if (status === 'paid' || status === 'completed') return 'confirmed';
+    if (status === 'expired' || status === 'cancelled') return 'expired';
+    if (status === 'pending' || status === 'waiting_payment') return 'pending';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Handles user asking about payment when webhook didn't arrive.
+ * Per spec Gap 2: Maria checks API directly.
+ */
+export async function handlePaymentInquiry(userId: string): Promise<void> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) return;
+
+  // Find the most recent PENDING payment
+  const pendingPayments = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.userId, userId))
+    .limit(5);
+
+  const pending = pendingPayments.find(p => p.status === 'PENDING' && p.abacateCheckoutId);
+
+  if (!pending || !pending.abacateCheckoutId) {
+    // No pending payment found — let Maria handle naturally
+    return;
+  }
+
+  const status = await checkAbacatePaymentStatus(pending.abacateCheckoutId);
+
+  switch (status) {
+    case 'confirmed': {
+      // Payment confirmed via API — process it manually
+      await db.update(payments).set({
+        status: 'PAID',
+        paidAt: new Date(),
+        updatedAt: new Date(),
+      }).where(eq(payments.id, pending.id));
+
+      await db.insert(subscriptions).values({
+        userId,
+        status: 'active',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
+
+      await db.update(users).set({
+        isPro: true,
+        lifecycleState: 'active_pro',
+        pendingAction: 'awaiting_email',
+        proExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        updatedAt: new Date(),
+      }).where(eq(users.id, userId));
+
+      await outboundQueue.add('payment_confirmed_late', {
+        userId,
+        phone: user.phone,
+        messageText: TEMPLATE.PAY_02,
+        messageType: 'text',
+        persona: 'maria',
+        sessionId: '',
+      } as OutboundJobData, { attempts: 2, backoff: { type: 'exponential', delay: 2000 } });
+      break;
+    }
+
+    case 'expired': {
+      await outboundQueue.add('payment_expired_inquiry', {
+        userId,
+        phone: user.phone,
+        messageText: TEMPLATE.PAY_09,
+        messageType: 'text',
+        persona: 'maria',
+        sessionId: '',
+      } as OutboundJobData, { attempts: 2, backoff: { type: 'exponential', delay: 2000 } });
+      break;
+    }
+
+    case 'pending': {
+      await outboundQueue.add('payment_still_pending', {
+        userId,
+        phone: user.phone,
+        messageText: 'Ainda não recebi a confirmação. Me manda o comprovante que eu verifico aqui.',
+        messageType: 'text',
+        persona: 'maria',
+        sessionId: '',
+      } as OutboundJobData, { attempts: 2, backoff: { type: 'exponential', delay: 2000 } });
+      break;
+    }
+
+    default: {
+      await outboundQueue.add('payment_inquiry_unknown', {
+        userId,
+        phone: user.phone,
+        messageText: TEMPLATE.PAY_08,
+        messageType: 'text',
+        persona: 'maria',
+        sessionId: '',
+      } as OutboundJobData, { attempts: 2, backoff: { type: 'exponential', delay: 2000 } });
+    }
+  }
+}
+
+const PAYMENT_STALE_HOURS = 24;
+
+/**
+ * Scheduled job: alerts on payments PENDING for more than 24h.
+ * Per spec Gap 2: generates internal Sentry alert for manual investigation.
+ */
+export async function alertStalePayments(): Promise<number> {
+  const staleThreshold = new Date(Date.now() - PAYMENT_STALE_HOURS * 60 * 60 * 1000);
+
+  const stalePayments = await db
+    .select()
+    .from(payments)
+    .where(eq(payments.status, 'PENDING'))
+    .limit(100);
+
+  const actuallyStale = stalePayments.filter(p =>
+    p.createdAt && new Date(p.createdAt) < staleThreshold,
+  );
+
+  for (const payment of actuallyStale) {
+    // Log to Sentry as alert for manual investigation
+    console.warn(`[PAYMENT-ALERT] Payment ${payment.id} has been PENDING for over 24h. User: ${payment.userId}, Checkout: ${payment.abacateCheckoutId}`);
+
+    // Sentry capture if available
+    try {
+      const Sentry = await import('@sentry/node');
+      Sentry.captureMessage(`Stale payment: ${payment.id} (PENDING > 24h)`, 'warning');
+    } catch {
+      // Sentry not available — console.warn above is sufficient
+    }
+  }
+
+  return actuallyStale.length;
+}

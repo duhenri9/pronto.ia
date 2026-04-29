@@ -17,6 +17,7 @@ const SONNET_INTENTS = new Set<Intent>([
   'pro_offer_response',    // Revenue decision — careful interpretation
   'cancellation_request',  // Retention without being pushy
   'payment_response',      // Critical — don't confuse
+  'reactivation_request',  // Revenue — returning customer needs care
   'exercise_submitted',    // Technical evaluation via evaluator
 ]);
 

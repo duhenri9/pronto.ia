@@ -290,3 +290,40 @@ export async function handleInboundWhenCancelled(
 
   return true;
 }
+
+// ---- Gap 3: Pro Reactivation (1.5.C) ----
+
+/**
+ * Handles a cancelled user who wants to reactivate Pro.
+ * Per spec: sends REA_01 acknowledgement, then initiates checkout.
+ * Only triggers for users with lifecycle_state = "cancelled" or "churned".
+ */
+export async function handleReactivationRequest(
+  userId: string,
+): Promise<boolean> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) return false;
+
+  // Only allow reactivation for cancelled/churned users
+  if (user.lifecycleState !== 'cancelled' && user.lifecycleState !== 'churned') {
+    return false;
+  }
+
+  const displayName = user.displayName ?? user.name ?? 'amiga';
+
+  // Send reactivation acknowledgement
+  await outboundQueue.add('reactivation_acknowledge', {
+    userId,
+    phone: user.phone,
+    messageText: TEMPLATE.REA_01(displayName),
+    messageType: 'text',
+    persona: 'maria',
+    sessionId: '',
+  } as OutboundJobData, { attempts: 2, backoff: { type: 'exponential', delay: 2000 } });
+
+  // Initiate checkout (same flow as initial, type='reactivation')
+  const { initiateCheckout } = await import('./payment');
+  await initiateCheckout(userId, 'initial');
+
+  return true;
+}
