@@ -8,6 +8,7 @@
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
 import * as Sentry from '@sentry/node';
+import { recordFailure } from './failure-tracker';
 import { db, eq, desc } from '@pronto-ia/database';
 import {
   users,
@@ -222,6 +223,7 @@ inboundWorker.on('failed', (job, err) => {
   Sentry.captureException(err, {
     extra: { jobId: job?.id, jobData: job?.data },
   });
+  recordFailure('whatsapp.inbound', job?.id, err.message);
 });
 
 inboundWorker.on('completed', (job) => {

@@ -14,9 +14,17 @@ const connection = new IORedis(process.env.REDIS_URL!, {
   maxRetriesPerRequest: null, // BullMQ requirement
 });
 
-export const inboundQueue = new Queue('whatsapp.inbound', { connection });
-export const outboundQueue = new Queue('whatsapp.outbound', { connection });
-export const scheduledQueue = new Queue('whatsapp.scheduled', { connection });
+// Shared default job options
+const defaultJobOptions = {
+  attempts: 3,
+  backoff: { type: 'exponential' as const, delay: 2000 },
+  removeOnComplete: { age: 86400, count: 1000 },
+  removeOnFail: { age: 7 * 86400 },
+};
+
+export const inboundQueue = new Queue('whatsapp.inbound', { connection, defaultJobOptions });
+export const outboundQueue = new Queue('whatsapp.outbound', { connection, defaultJobOptions });
+export const scheduledQueue = new Queue('whatsapp.scheduled', { connection, defaultJobOptions });
 
 // ---- Job Data Types ----
 
