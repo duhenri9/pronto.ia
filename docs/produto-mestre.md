@@ -1,6 +1,6 @@
 # Pronto.IA — Produto Mestre
 
-**Versão:** 2.1 (5 correções de gaps aplicadas)
+**Versão:** 2.2 (lições 4/5/7 reescritas + kill switch + intent router conectado)
 **Fonte de verdade:** Este documento é a referência canônica. Quando algo mudar, muda primeiro aqui, depois no código.
 
 ---
@@ -23,10 +23,10 @@ Implementação: `apps/worker/src/flows/onboarding.ts` — `extractName()` + `ha
 | FREE-L01 | O que é IA generativa | "Imagina uma assistente que já leu tudo sobre o seu ramo e te responde na hora. Isso é IA generativa. Não é mágica — é uma ferramenta. Como uma calculadora, só que pra palavras e ideias. Você pergunta, ela responde baseada em tudo que aprendeu." | "Já usou alguma IA antes? Me conta como foi." |
 | FREE-L02 | Os 3 ingredientes de um bom pedido | "Pra IA te ajudar bem, você precisa dar 3 coisas: (1) o que você quer, (2) contexto do seu negócio, (3) como quer a resposta. Exemplo: 'Me dá 3 ideias de legenda pra Instagram de uma doceria caseira. Tom afetuoso, pra mães de 25-40 anos.' Percebe a diferença?" | "Tenta fazer um pedido assim agora e me mostra." |
 | FREE-L03 | IA pra escrever melhor | "Legenda, mensagem de WhatsApp, descrição de produto, bio do Instagram. A IA escreve o rascunho em segundos. Você revisa e deixa com a sua cara. Economiza tempo e soa profissional mesmo sem ter jeito com palavras." | "Me fala uma mensagem difícil que você precisa escrever hoje." |
-| FREE-L04 | IA pra resumir informação | "Tem muito texto pra ler? A IA resume em 3 frases. Contrato, matéria, tutorial, bula de remédio. Você cola o texto e pede: 'me explica em 2 linhas o que importa aqui'. Pronto." | "Tem algo grande que você precisava ler essa semana? Me manda." |
-| FREE-L05 | IA pra decidir melhor | "Na dúvida entre duas opções? Pergunta pra IA. 'Vale mais a pena fazer promoção de 20% ou levar 2 e pagar 1 pra produto X?' Ela te dá os prós e contras com base no que sabe do mercado. A decisão final é sua, mas a análise é dela." | "Tem alguma decisão do negócio que tá te tirando o sono?" |
+| FREE-L04 | IA pra resumir informação | "Mensagem longa de cliente e você não entendeu o que ele quer? Contrato confuso? A IA resume em 3 frases. Você cola o texto e pede: 'me explica em 2 linhas o que importa aqui'. Pronto." | "Tem alguma mensagem de cliente que tá te confundindo? Cola aqui que eu resumo o que ele realmente quer." |
+| FREE-L05 | IA pra decidir melhor | "Na dúvida entre duas opções? Pergunta pra IA. 'Qual nome combina mais pro meu produto?' ou 'Qual bio soa melhor pro meu Instagram?' — ela te dá prós e contras. Pra decisão que envolve dinheiro, sempre peça prós e contras — nunca resposta direta. A decisão final é sua." | "Tem alguma decisão do negócio que tá te tirando o sono?" |
 | FREE-L06 | O que a IA ainda erra | "IA não é perfeita. Ela pode inventar dados, errar contas, dar conselho genérico. Por isso você sempre revisa. Ela é sua estagiária — muito rápida, mas precisa de supervisão. Nunca terceirize decisão final." | "Já pegou algum erro de IA? Se ainda não, fica de olho." |
-| FREE-L07 | Próximo passo: aplicar no que VOCÊ faz | "As primeiras 6 lições foram o básico. Agora a gente pode ir mais fundo no SEU negócio. Salão, comida, conserto — cada um tem um jeito de usar IA. Se quiser ir mais fundo no seu ramo, me fala que eu te conto como." | "Quer ir mais fundo no seu negócio com IA? Me conta o que mais te interessa." |
+| FREE-L07 | Próximo passo: aplicar no que VOCÊ faz | "As primeiras 6 lições foram o básico. Agora a gente pode ir mais fundo no SEU negócio. Eu tenho a Bia (pra salão), e em breve Léo (pra comida) e Tião (pra conserto). Cada um manja do ramo de verdade." | "Me conta com mais detalhe o que você faz — quero ver se é hora de te apresentar especialista." |
 
 Implementação: `apps/worker/src/flows/free-lessons.ts` — `FREE_LESSONS[]`, `getNextFreeLesson()`, `formatLessonForDelivery()`
 
@@ -66,6 +66,33 @@ Implementação: `apps/worker/src/flows/renewal.ts` — `handleReactivationReque
 - **`lifecycle_state` vira `"deleted"`** (não `"cancelled"`).
 
 Implementação: `apps/worker/src/flows/cancellation.ts` — `lgpdAnonymizeWorker()`
+
+### 1.7 Intent Router — Classificação e Roteamento
+
+O inbound processor classifica toda mensagem recebida antes de chamar o LLM:
+
+1. **Step 4.5** no inbound processor: `classifyIntent()` (regex + Gemini Flash 2.0) classifica a intenção
+2. **Roteamento**: `routeToHandler()` despacha para handler específico baseado em `intent` + `pendingAction` + `lifecycleState`
+3. **Escalação de modelo**: `getModelForIntent()` seleciona Sonnet 4.5 para intents críticos (LGPD, receita, cancelamento, pagamento, reativação)
+4. Se nenhum handler assumir, Maria responde normalmente via LLM
+
+Handlers dedicados: `handleLgpdDeleteRequest`, `handleLgpdConfirmation`, `handleCancellationRequest`, `handleCancellationConfirmation`, `handleCancellationReason`, `handlePaymentInquiry`, `handleEmailCapture`, `handleProResponse`, `handleReactivationRequest`
+
+Implementação: `apps/worker/src/processors/inbound.ts` (Step 4.5), `packages/llm/src/router.ts`, `packages/llm/src/model-mapper.ts`
+
+### 1.8 LLM Kill Switch
+
+Desliga o LLM instantaneamente sem restart, via flag Redis:
+
+- **Redis key**: `pronto:llm:disabled` — checada no início de toda chamada `ProntoLLMClient.chat()`
+- **Fallback**: se desligado, retorna mensagem de manutenção com zero tokens e `finishReason: 'kill_switch'`
+- **Env var fallback**: `LLM_DISABLED=true` se Redis indisponível
+- **Admin endpoints**:
+  - `GET /api/v1/admin/llm` — verifica status (retorna `{ disabled, source }`)
+  - `POST /api/v1/admin/llm/disable` — ativa kill switch (set Redis key)
+  - `POST /api/v1/admin/llm/enable` — desativa kill switch (del Redis key)
+
+Implementação: `packages/llm/src/client.ts` (`isLLMDisabled`, `setLLMKillSwitch`, `getLLMKillSwitchStatus`), `apps/web/src/app/api/v1/admin/llm/`
 
 ---
 

@@ -40,14 +40,14 @@ export const FREE_LESSONS: FreeLesson[] = [
     lessonId: 'FREE-L04',
     dayNumber: 4,
     title: 'IA pra resumir informação',
-    body: 'Tem muito texto pra ler? A IA resume em 3 frases. Contrato, matéria, tutorial, bula de remédio. Você cola o texto e pede: "me explica em 2 linhas o que importa aqui". Pronto.',
-    cta: 'Tem algo grande que você precisava ler essa semana? Me manda.',
+    body: 'Mensagem longa de cliente e você não entendeu o que ele quer? Contrato confuso? A IA resume em 3 frases. Você cola o texto e pede: "me explica em 2 linhas o que importa aqui". Pronto.',
+    cta: 'Tem alguma mensagem de cliente que tá te confundindo? Cola aqui que eu resumo o que ele realmente quer.',
   },
   {
     lessonId: 'FREE-L05',
     dayNumber: 5,
     title: 'IA pra decidir melhor',
-    body: 'Na dúvida entre duas opções? Pergunta pra IA. "Vale mais a pena fazer promoção de 20% ou levar 2 e pagar 1 pra produto X?" Ela te dá os prós e contras com base no que sabe do mercado. A decisão final é sua, mas a análise é dela.',
+    body: 'Na dúvida entre duas opções? Pergunta pra IA. "Qual nome combina mais pro meu produto?" ou "Qual bio soa melhor pro meu Instagram?" — ela te dá prós e contras. Pra decisão que envolve dinheiro, sempre peça prós e contras — nunca resposta direta. A decisão final é sua.',
     cta: 'Tem alguma decisão do negócio que tá te tirando o sono?',
   },
   {
@@ -61,8 +61,8 @@ export const FREE_LESSONS: FreeLesson[] = [
     lessonId: 'FREE-L07',
     dayNumber: 7,
     title: 'Próximo passo: aplicar no que VOCÊ faz',
-    body: 'As primeiras 6 lições foram o básico. Agora a gente pode ir mais fundo no SEU negócio. Salão, comida, conserto — cada um tem um jeito de usar IA. Se quiser ir mais fundo no seu ramo, me fala que eu te conto como.',
-    cta: 'Quer ir mais fundo no seu negócio com IA? Me conta o que mais te interessa.',
+    body: 'As primeiras 6 lições foram o básico. Agora a gente pode ir mais fundo no SEU negócio. Eu tenho a Bia (pra salão), e em breve Léo (pra comida) e Tião (pra conserto). Cada um manja do ramo de verdade.',
+    cta: 'Me conta com mais detalhe o que você faz — quero ver se é hora de te apresentar especialista.',
   },
 ];
 

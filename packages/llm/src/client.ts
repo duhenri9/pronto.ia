@@ -64,6 +64,22 @@ export class ProntoLLMClient {
   }
 
   async chat(options: LLMCallOptions): Promise<LLMCallResult> {
+    // Kill switch: check Redis flag first (instant, no restart needed)
+    const disabled = await isLLMDisabled();
+    if (disabled) {
+      const prompt = loadPrompt(options.persona);
+      return {
+        text: prompt.meta.fallbackMessage ?? 'Tô passando por um momento de manutenção. Volto em alguns minutos.',
+        model: 'kill-switch-fallback',
+        persona: options.persona,
+        inputTokens: 0,
+        outputTokens: 0,
+        latencyMs: 0,
+        estimatedCostCents: 0,
+        finishReason: 'kill_switch',
+      };
+    }
+
     return this.callWithFallback(options);
   }
 
@@ -240,6 +256,77 @@ export class ProntoLLMClient {
     );
 
     return Math.max(inputCostCents + outputCostCents, 1);
+  }
+}
+
+// ---- Kill Switch ----
+
+const LLM_KILL_SWITCH_KEY = 'pronto:llm:disabled';
+
+/**
+ * Checks if LLM is disabled via Redis flag (instant toggle) or env var.
+ * Redis flag takes priority over env var.
+ */
+async function isLLMDisabled(): Promise<boolean> {
+  // Fast path: env var check (no network call)
+  if (process.env.LLM_DISABLED === 'true') return true;
+
+  // Redis flag check (instant toggle without restart)
+  try {
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) return false;
+
+    // Lazy-import IORedis to avoid hard dependency in llm package
+    const IORedis = (await import('ioredis')).default;
+    const redis = new IORedis(redisUrl, { lazyConnect: true, maxRetriesPerRequest: 1 });
+    const val = await redis.get(LLM_KILL_SWITCH_KEY);
+    await redis.quit();
+    return val === '1' || val === 'true';
+  } catch {
+    // Redis unavailable — rely on env var only
+    return false;
+  }
+}
+
+/**
+ * Enable or disable the LLM kill switch via Redis.
+ * Used by admin endpoints for instant toggling.
+ */
+export async function setLLMKillSwitch(disabled: boolean): Promise<void> {
+  const redisUrl = process.env.REDIS_URL;
+  if (!redisUrl) throw new Error('REDIS_URL not configured');
+
+  const IORedis = (await import('ioredis')).default;
+  const redis = new IORedis(redisUrl, { lazyConnect: true, maxRetriesPerRequest: 1 });
+
+  if (disabled) {
+    await redis.set(LLM_KILL_SWITCH_KEY, '1');
+  } else {
+    await redis.del(LLM_KILL_SWITCH_KEY);
+  }
+
+  await redis.quit();
+}
+
+/**
+ * Check kill switch status from Redis.
+ */
+export async function getLLMKillSwitchStatus(): Promise<{ disabled: boolean; source: string }> {
+  if (process.env.LLM_DISABLED === 'true') {
+    return { disabled: true, source: 'env' };
+  }
+
+  try {
+    const redisUrl = process.env.REDIS_URL;
+    if (!redisUrl) return { disabled: false, source: 'none' };
+
+    const IORedis = (await import('ioredis')).default;
+    const redis = new IORedis(redisUrl, { lazyConnect: true, maxRetriesPerRequest: 1 });
+    const val = await redis.get(LLM_KILL_SWITCH_KEY);
+    await redis.quit();
+    return { disabled: val === '1' || val === 'true', source: 'redis' };
+  } catch {
+    return { disabled: false, source: 'error' };
   }
 }
 

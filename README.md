@@ -19,8 +19,15 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 | Event bus tipado | ✅ Implementado |
 | BullMQ worker + Redis queue | ✅ Implementado (3 processors) |
 | Sentry error tracking | ✅ Implementado |
+| Intent router (11 categorias + Gemini Flash) | ✅ Implementado + conectado ao inbound processor |
+| Model escalation (Haiku → Sonnet por intent) | ✅ Implementado |
+| Fluxos operacionais (onboarding, pagamento, cancelamento, LGPD, reativação) | ✅ Implementado |
+| 7 microcápsulas gratuitas (FREE-L01 a FREE-L07) | ✅ Implementado |
+| LLM kill switch (Redis flag + admin endpoints) | ✅ Implementado |
+| Rate limiting + cost baseline | ✅ Implementado |
 | Storybook / Lighthouse CI | 🔜 Fase 2+ |
 | Payments (Abacate Pay + Stripe) | 🔜 Fase 3 |
+| Deploy Railway (worker + migrations Neon) | 🔜 Pendente (credenciais) |
 
 ## Stack
 
@@ -29,7 +36,7 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 | Frontend + API | **Next.js 15** App Router | apps/web |
 | ORM | **Drizzle ORM** + postgres.js | packages/database |
 | Auth | **jose** (HS256 JWT) | packages/auth · tech debt reconhecido |
-| LLM | **Anthropic Claude** (Haiku 4.5 / Sonnet 4.5) | packages/llm |
+| LLM | **Anthropic Claude** (Haiku 4.5 / Sonnet 4.5) | packages/llm · kill switch via Redis |
 | WhatsApp | **Z-API** (provider primário) | packages/whatsapp |
 | Pagamento | **AbacatePay** (Pix + Cartão) | Phase 3 |
 | DB | **PostgreSQL 16** (Neon, região sa-east-1) | packages/database |
@@ -64,17 +71,18 @@ Web é repositório — dashboard de progresso, certificados, gestão de trilhas
 
 ```
 apps/
-  web/            Next.js 15 (App Router + API Routes)
+  web/            Next.js 15 (App Router + API Routes + Admin endpoints)
   worker/         BullMQ worker (inbound/outbound/scheduled processors)
 packages/
   database/       Drizzle ORM + schema + migrations + SQL helpers
   auth/           jose JWT (sign/verify) + bcryptjs
   types/          Shared TypeScript types + Zod schemas
-  llm/            Anthropic Claude client + guardrails
+  llm/            Anthropic Claude client + guardrails + kill switch + intent router + model mapper
   whatsapp/       Cloud API + Z-API (factory pattern)
   events/         Typed domain event bus
 prompts/
   personas/       Versioned persona system prompts (YAML frontmatter + MD)
+  router/         Intent classifier prompt (Gemini Flash)
 docs/
   adr/            Architecture Decision Records
 ```
@@ -114,10 +122,17 @@ pnpm --filter @pronto-ia/web dev
 
 - ✅ Schema completo (users, trilhas, enrollment, whatsapp, llm, payments, LGPD)
 - ✅ Stack migrada (Next.js + Drizzle + Anthropic + jose)
-- ✅ Persona prompts versionados
+- ✅ Persona prompts versionados (Maria, Bia, Léo, Tião, Evaluator)
 - ✅ WhatsApp client factory
 - ✅ BullMQ worker (3 queues: inbound, outbound, scheduled)
 - ✅ Sentry error tracking
+- ✅ Intent router (11 categorias, Gemini Flash 2.0, conectado ao inbound processor)
+- ✅ Model escalation (Haiku → Sonnet por intent crítico)
+- ✅ Fluxos operacionais (onboarding, pagamento, cancelamento, LGPD, reativação)
+- ✅ 7 microcápsulas gratuitas (FREE-L01 a FREE-L07)
+- ✅ LLM kill switch (Redis flag + admin API endpoints)
+- ✅ Rate limiting + cost baseline
+- 🔜 Deploy Railway (worker + migrations Neon)
 - 🔜 Auth refactor (jose → Better Auth — ADR-0013)
 - 🔜 Payments (Abacate Pay + Stripe — Phase 3, ADR-0012)
 

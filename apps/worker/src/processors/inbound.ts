@@ -18,12 +18,23 @@ import {
   enrollments,
   processedEvents,
 } from '@pronto-ia/database';
-import { ProntoLLMClient, getLLMClient, loadPrompt } from '@pronto-ia/llm';
-import type { ChatMessage, LLMCallResult } from '@pronto-ia/llm';
+import { ProntoLLMClient, getLLMClient, loadPrompt, classifyIntent, getModelForIntent } from '@pronto-ia/llm';
+import type { ChatMessage, LLMCallResult, Intent } from '@pronto-ia/llm';
 import { eventBus } from '@pronto-ia/events';
 
 import type { InboundJobData, OutboundJobData } from '../queues';
 import { outboundQueue } from '../queues';
+import {
+  handleLgpdDeleteRequest,
+  handleLgpdConfirmation,
+  handleCancellationRequest,
+  handleCancellationConfirmation,
+  handleCancellationReason,
+  handlePaymentInquiry,
+  handleEmailCapture,
+  handleProResponse,
+  handleReactivationRequest,
+} from '../flows';
 
 const connection = new IORedis(process.env.REDIS_URL!, {
   maxRetriesPerRequest: null,
@@ -92,7 +103,31 @@ export const inboundWorker = new Worker<InboundJobData>(
       lessonId = enrollment.currentLessonId ?? undefined;
     }
 
-    // ---- Step 4: Build conversation history ----
+    // ---- Step 4.5: Classify intent + route to specific handlers ----
+
+    const [userRow] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const lifecycleState = userRow?.lifecycleState ?? 'provisional';
+    const pendingAction = userRow?.pendingAction ?? null;
+
+    const intentResult = await classifyIntent(messageText, lifecycleState);
+    const intent = intentResult.intent;
+
+    console.log(`[INBOUND] Intent: ${intent} (confidence: ${intentResult.confidence}, source: ${intentResult.source}) for phone ${phone}`);
+
+    // Route to specific flow handlers based on intent + pending_action + lifecycle_state
+    const handled = await routeToHandler(intent, userId, messageText, pendingAction, lifecycleState);
+    if (handled) {
+      // Handler took over — no LLM call needed, just emit event and return
+      eventBus.emit({
+        type: 'whatsapp.inbound',
+        timestamp: new Date(),
+        payload: { userId, phone, messageText, messageId, messageType, sessionId, intent },
+      });
+      console.log(`[INBOUND] Handled by flow: ${intent} for ${phone}`);
+      return;
+    }
+
+    // ---- Step 4b: Build conversation history ----
 
     const recentMessages = await db
       .select()
@@ -113,10 +148,14 @@ export const inboundWorker = new Worker<InboundJobData>(
     // Add current message
     chatHistory.push({ role: 'user', content: messageText });
 
-    // ---- Step 5: Call LLM ----
+    // ---- Step 5: Call LLM (with model escalation based on intent) ----
 
     const llm = getLLMClient();
     let llmResult: LLMCallResult;
+
+    // Resolve model based on intent classification (Anexo B)
+    const prompt = loadPrompt(persona);
+    const escalationModel = getModelForIntent(intent, prompt.meta.model);
 
     try {
       llmResult = await llm.chat({
@@ -125,6 +164,9 @@ export const inboundWorker = new Worker<InboundJobData>(
         userId,
         sessionId,
         lessonId,
+        config: escalationModel !== prompt.meta.model
+          ? { model: escalationModel as import('@pronto-ia/types').AnthropicModel }
+          : undefined,
       });
     } catch (err) {
       console.error(`[INBOUND] LLM call failed for ${phone}:`, err);
@@ -306,4 +348,81 @@ async function resolveActiveEnrollment(userId: string) {
 
   // Return first ACTIVE enrollment, if any
   return result.find((e) => e.status === 'ACTIVE') ?? null;
+}
+
+// ---- Intent-based routing ----
+
+/**
+ * Routes inbound messages to specific flow handlers based on intent + state.
+ * Returns true if a handler took over (no LLM call needed).
+ * Returns false if normal LLM conversation should proceed.
+ */
+async function routeToHandler(
+  intent: Intent,
+  userId: string,
+  messageText: string,
+  pendingAction: string | null,
+  lifecycleState: string,
+): Promise<boolean> {
+  try {
+    // LGPD deletion — highest priority (irreversible action)
+    if (intent === 'command_lgpd_delete') {
+      if (pendingAction === 'awaiting_lgpd_confirmation') {
+        await handleLgpdConfirmation(userId, messageText);
+      } else {
+        await handleLgpdDeleteRequest(userId);
+      }
+      return true;
+    }
+
+    // Cancellation flow
+    if (intent === 'cancellation_request') {
+      if (pendingAction === 'awaiting_cancellation_confirmation') {
+        await handleCancellationConfirmation(userId, messageText);
+        return true;
+      }
+      // Fresh cancellation request
+      await handleCancellationRequest(userId);
+      return true;
+    }
+
+    if (pendingAction === 'awaiting_cancellation_reason') {
+      await handleCancellationReason(userId, messageText);
+      return true;
+    }
+
+    // Payment response — user says "paguei" or similar
+    if (intent === 'payment_response') {
+      if (pendingAction === 'awaiting_payment') {
+        await handlePaymentInquiry(userId);
+        return true;
+      }
+      if (pendingAction === 'awaiting_email') {
+        const captured = await handleEmailCapture(userId, messageText);
+        if (captured) return true;
+        // Email didn't match — fall through to LLM for retry
+      }
+    }
+
+    // Pro offer response
+    if (intent === 'pro_offer_response' && pendingAction === 'pro_offer_pending') {
+      await handleProResponse(userId, messageText);
+      return true;
+    }
+
+    // Pro reactivation — cancelled/churned user wants back
+    if (intent === 'reactivation_request' &&
+        (lifecycleState === 'cancelled' || lifecycleState === 'churned')) {
+      const handled = await handleReactivationRequest(userId);
+      if (handled) return true;
+    }
+
+    // No specific handler — LLM handles it
+    return false;
+  } catch (err) {
+    console.error(`[INBOUND] Handler error for intent ${intent}:`, err);
+    Sentry.captureException(err, { extra: { intent, userId } });
+    // Don't block — let LLM handle as fallback
+    return false;
+  }
 }
