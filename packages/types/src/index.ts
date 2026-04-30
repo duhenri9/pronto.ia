@@ -94,7 +94,7 @@ export interface WhatsAppOutgoingMessage {
 // ---- Maria Persona ----
 export interface MariaMessage {
   text: string;
-  persona: 'maria' | 'bia' | 'leo' | 'tiao' | 'ze';
+  persona: 'maria' | 'bia' | 'leo' | 'tiao' | 'ze-da-ti';
   emoji?: string;
   lessonId?: string;
   exercisePrompt?: string;
