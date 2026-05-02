@@ -25,6 +25,9 @@ function findDotenvPath(base: string): string | undefined {
 }
 
 const envPath = findDotenvPath(__dirname) ?? findDotenvPath(process.cwd());
+console.log(`[ENV] current cwd=${process.cwd()}`);
+console.log(`[ENV] searching for .env from __dirname=${__dirname}`);
+console.log(`[ENV] found dotenv path=${envPath ?? 'none'}`);
 if (envPath) {
   dotenvConfig({ path: envPath });
 } else {
