@@ -1,6 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env"],
+  "globalEnv": [
+    "NODE_ENV",
+    "REDIS_URL",
+    "JWT_SECRET",
+    "SENTRY_DSN",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "ZAPI_TOKEN",
+    "ADMIN_SECRET",
+    "DATABASE_URL",
+    "COOKIE_SECRET",
+    "RESEND_API_KEY",
+    "ZAPI_INSTANCE_ID",
+    "ANTHROPIC_API_KEY",
+    "SENTRY_AUTH_TOKEN",
+    "WHATSAPP_PROVIDER",
+    "ZAPI_SECURITY_TOKEN",
+    "WHATSAPP_WEBHOOK_VERIFY_TOKEN",
+    "Abacate_pay_api"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
