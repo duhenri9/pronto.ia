@@ -20,8 +20,11 @@ COPY apps/worker ./apps/worker
 # Instalar TODAS as dependências (incluindo devDependencies para build)
 RUN pnpm install --frozen-lockfile
 
-# Build do worker (precisa de tsc, que está em devDependencies)
+# Limpar cache de build anterior (tsbuildinfo) para force rebuild
 WORKDIR /app/apps/worker
+RUN pnpm run clean && rm -f tsconfig.tsbuildinfo
+
+# Build do worker (precisa de tsc, que está em devDependencies)
 RUN pnpm run build
 
 # ============================================
