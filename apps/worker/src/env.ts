@@ -4,7 +4,32 @@
 // Validates all required environment variables at startup.
 // Crashes immediately if any critical variable is missing.
 
-import 'dotenv/config';
+import { config as dotenvConfig } from 'dotenv';
+import { existsSync } from 'fs';
+import { dirname, join } from 'path';
+
+function findDotenvPath(base: string): string | undefined {
+  let current = base;
+
+  for (let i = 0; i < 6; i += 1) {
+    const candidate = join(current, '.env');
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return undefined;
+}
+
+const envPath = findDotenvPath(__dirname) ?? findDotenvPath(process.cwd());
+if (envPath) {
+  dotenvConfig({ path: envPath });
+} else {
+  dotenvConfig();
+}
 
 interface EnvConfig {
   DATABASE_URL: string;
@@ -27,6 +52,7 @@ function required(name: string): string {
   const value = process.env[name];
   if (!value) {
     console.error(`[ENV] Missing required variable: ${name}`);
+    console.error(`[ENV] TIP: Set ${name} in the host environment or add it to the root .env file.`);
     process.exit(1);
   }
   return value;
