@@ -108,6 +108,11 @@ pnpm --filter @pronto-ia/database db:push
 pnpm --filter @pronto-ia/web dev
 ```
 
+## Environment And Deploy
+
+- Operational env matrix and WhatsApp provider migration plan:
+  [docs/deployment-environments.md](/Users/edu/Desktop/Pronto.IA/pronto.ia/docs/deployment-environments.md:1)
+
 ## ADRs
 
 | ID | Decisão | Status |
