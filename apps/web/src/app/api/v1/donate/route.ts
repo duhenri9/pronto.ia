@@ -11,6 +11,9 @@ interface AbacateCreateResponse {
     status: string;
     brCode?: string;
     brCodeBase64?: string;
+    qrCode?: string;
+    qrCodeBase64?: string;
+    pixCode?: string;
     expiresAt?: string;
     createdAt?: string;
     updatedAt?: string;
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { amount, method } = body;
-    const apiKey = process.env.ABACATE_PAY_API_KEY;
+    const apiKey = process.env.ABACATE_PAY_API_KEY ?? process.env.ABACATE_PAY_API;
 
     // Validate amount
     if (!amount || typeof amount !== 'number' || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
@@ -73,8 +76,17 @@ export async function POST(request: NextRequest) {
       });
 
       const data = (await upstream.json()) as AbacateCreateResponse;
+      const pixCode =
+        data.data?.brCode?.trim() ||
+        data.data?.pixCode?.trim() ||
+        '';
+      const qrCode =
+        data.data?.brCodeBase64?.trim() ||
+        data.data?.qrCodeBase64?.trim() ||
+        data.data?.qrCode?.trim() ||
+        '';
 
-      if (!upstream.ok || !data.data?.id || !data.data.brCode || !data.data.brCodeBase64) {
+      if (!upstream.ok || !data.data?.id || !pixCode || !qrCode) {
         return NextResponse.json(
           { error: data.error ?? 'Não foi possível gerar o Pix agora.' },
           { status: upstream.status || 502 },
@@ -84,8 +96,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         donationId: data.data.id,
         status: data.data.status.toLowerCase(),
-        pixCode: data.data.brCode,
-        qrCode: data.data.brCodeBase64,
+        pixCode,
+        qrCode,
         expiresAt: data.data.expiresAt ?? null,
       });
     }

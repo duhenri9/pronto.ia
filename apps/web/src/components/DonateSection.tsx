@@ -48,6 +48,14 @@ function formatBRL(cents: number): string {
   return reais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function normalizeQrCodeSrc(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  if (trimmed.startsWith('data:image')) return trimmed;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  return `data:image/png;base64,${trimmed}`;
+}
+
 function formatExpiry(value: string | null): string | null {
   if (!value) return null;
 
@@ -94,8 +102,8 @@ export function DonateSection() {
       }
 
       if (data.pixCode && data.qrCode) {
-        setPixCode(data.pixCode);
-        setQrCode(data.qrCode);
+        setPixCode(String(data.pixCode).trim());
+        setQrCode(normalizeQrCodeSrc(String(data.qrCode)));
         setExpiresAt(data.expiresAt ?? null);
         setState('success');
       } else {
