@@ -2,11 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const MIN_AMOUNT = 500; // R$ 5,00 em centavos
 const MAX_AMOUNT = 10000000; // R$ 100.000,00 em centavos
+const ABACATE_API_URL = 'https://api.abacatepay.com/v2/transparents/create';
+
+interface AbacateCreateResponse {
+  data?: {
+    id: string;
+    amount: number;
+    status: string;
+    brCode?: string;
+    brCodeBase64?: string;
+    expiresAt?: string;
+    createdAt?: string;
+    updatedAt?: string;
+  };
+  error?: string | null;
+  success?: boolean | { message?: string };
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { amount, method } = body;
+    const apiKey = process.env.ABACATE_PAY_API_KEY;
 
     // Validate amount
     if (!amount || typeof amount !== 'number' || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
@@ -24,21 +41,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Placeholder: simulate donation (ready for Abacate Pay integration)
-    const donationId = `don_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    const response: Record<string, unknown> = {
-      donationId,
-      status: 'pending',
-    };
-
-    if (method === 'PIX') {
-      // TODO: Replace with real Abacate Pay PIX creation
-      response.pixCode = `00020126580014br.gov.bcb.pix0136${donationId}5204000053039865802BR5925PRONTO IA CAPACITACAO6009SAO PAULO62070503***63041234`;
-      response.qrCode = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(response.pixCode as string)}`;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'Doações Pix ainda não estão configuradas neste ambiente.' },
+        { status: 503 },
+      );
     }
 
-    return NextResponse.json(response);
+    if (method === 'PIX') {
+      const externalId = `don_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const upstream = await fetch(ABACATE_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          method: 'PIX',
+          data: {
+            amount,
+            expiresIn: 3600,
+            description: 'Doação para o projeto Pronto.IA',
+            externalId,
+            metadata: {
+              source: 'pronto-ia-web',
+              kind: 'donation',
+            },
+          },
+        }),
+        cache: 'no-store',
+      });
+
+      const data = (await upstream.json()) as AbacateCreateResponse;
+
+      if (!upstream.ok || !data.data?.id || !data.data.brCode || !data.data.brCodeBase64) {
+        return NextResponse.json(
+          { error: data.error ?? 'Não foi possível gerar o Pix agora.' },
+          { status: upstream.status || 502 },
+        );
+      }
+
+      return NextResponse.json({
+        donationId: data.data.id,
+        status: data.data.status.toLowerCase(),
+        pixCode: data.data.brCode,
+        qrCode: data.data.brCodeBase64,
+        expiresAt: data.data.expiresAt ?? null,
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'Método ainda não implementado.' },
+      { status: 501 },
+    );
   } catch {
     return NextResponse.json(
       { error: 'Erro interno. Tente novamente.' },

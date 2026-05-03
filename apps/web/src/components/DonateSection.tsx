@@ -43,27 +43,23 @@ const VALUE_TIERS = [
 
 type DonationState = 'idle' | 'selecting' | 'loading' | 'success' | 'error';
 
-function QRCodePlaceholder() {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="h-36 w-36 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center">
-        <div className="grid grid-cols-5 gap-[3px] p-3">
-          {Array.from({ length: 25 }).map((_, i) => (
-            <div
-              key={i}
-              className={`h-2 w-2 rounded-[2px] ${Math.random() > 0.4 ? 'bg-white/80' : 'bg-transparent'}`}
-            />
-          ))}
-        </div>
-      </div>
-      <p className="font-mono text-micro text-[#757994]">QR Code Pix</p>
-    </div>
-  );
-}
-
 function formatBRL(cents: number): string {
   const reais = cents / 100;
   return reais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatExpiry(value: string | null): string | null {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
 }
 
 export function DonateSection() {
@@ -73,13 +69,17 @@ export function DonateSection() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState('');
   const [pixCode, setPixCode] = useState('');
+  const [qrCode, setQrCode] = useState('');
+  const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('Algo deu errado — tente de novo.');
 
   const handleDonate = async () => {
     const amount = selectedAmount ?? Math.round(parseFloat(customAmount) * 100);
     if (!amount || amount < 500 || amount > 10000000) return;
 
     setState('loading');
+    setErrorMessage('Algo deu errado — tente de novo.');
     try {
       const res = await fetch('/api/v1/donate', {
         method: 'POST',
@@ -87,13 +87,23 @@ export function DonateSection() {
         body: JSON.stringify({ amount, method: 'PIX' }),
       });
       const data = await res.json();
-      if (data.pixCode) {
+      if (!res.ok) {
+        setErrorMessage(data.error ?? 'Não foi possível gerar o Pix agora.');
+        setState('error');
+        return;
+      }
+
+      if (data.pixCode && data.qrCode) {
         setPixCode(data.pixCode);
+        setQrCode(data.qrCode);
+        setExpiresAt(data.expiresAt ?? null);
         setState('success');
       } else {
+        setErrorMessage('Não foi possível gerar o Pix agora.');
         setState('error');
       }
     } catch {
+      setErrorMessage('Erro de conexão. Tente novamente em instantes.');
       setState('error');
     }
   };
@@ -113,7 +123,10 @@ export function DonateSection() {
       setSelectedAmount(null);
       setCustomAmount('');
       setPixCode('');
+      setQrCode('');
+      setExpiresAt(null);
       setCopied(false);
+      setErrorMessage('Algo deu errado — tente de novo.');
     }, 150);
   };
 
@@ -277,9 +290,21 @@ export function DonateSection() {
                   Você ajuda a capacitar o Brasil para a era da IA.
                 </p>
 
-                {/* QR Code placeholder */}
-                <div className="mt-5">
-                  <QRCodePlaceholder />
+                <div className="mt-5 flex flex-col items-center gap-2">
+                  <div className="rounded-2xl bg-white p-3 shadow-elev-1">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={qrCode}
+                      alt="QR Code Pix para doação"
+                      className="h-40 w-40 rounded-lg"
+                    />
+                  </div>
+                  <p className="font-mono text-micro text-[#757994]">QR Code Pix real</p>
+                  {formatExpiry(expiresAt) && (
+                    <p className="text-micro text-[#757994]">
+                      Válido até {formatExpiry(expiresAt)}
+                    </p>
+                  )}
                 </div>
 
                 {/* Copia-e-cola */}
@@ -309,7 +334,7 @@ export function DonateSection() {
             {/* ── Error ── */}
             {state === 'error' && (
               <div className="flex flex-col items-center py-6">
-                <p className="text-body-s text-red-400">Algo deu errado — tente de novo.</p>
+                <p className="text-center text-body-s text-red-400">{errorMessage}</p>
                 <button
                   onClick={() => setState('selecting')}
                   className="mt-4 rounded-lg border border-white/10 px-4 py-2.5 text-body-s text-white/80 hover:bg-white/5 transition-colors"
