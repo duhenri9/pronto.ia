@@ -56,6 +56,12 @@ function normalizeQrCodeSrc(value: string): string {
   return `data:image/png;base64,${trimmed}`;
 }
 
+function buildQrFallbackFromPixCode(pixCode: string): string {
+  const trimmed = pixCode.trim();
+  if (!trimmed) return '';
+  return `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(trimmed)}`;
+}
+
 function formatExpiry(value: string | null): string | null {
   if (!value) return null;
 
@@ -101,9 +107,16 @@ export function DonateSection() {
         return;
       }
 
-      if (data.pixCode && data.qrCode) {
-        setPixCode(String(data.pixCode).trim());
-        setQrCode(normalizeQrCodeSrc(String(data.qrCode)));
+      const normalizedPixCode = String(data.pixCode ?? '').trim();
+      const normalizedQrCode = String(data.qrCode ?? '').trim();
+
+      if (normalizedPixCode || normalizedQrCode) {
+        const finalQrCode = normalizedQrCode
+          ? normalizeQrCodeSrc(normalizedQrCode)
+          : buildQrFallbackFromPixCode(normalizedPixCode);
+
+        setPixCode(normalizedPixCode);
+        setQrCode(finalQrCode);
         setExpiresAt(data.expiresAt ?? null);
         setState('success');
       } else {
@@ -299,15 +312,23 @@ export function DonateSection() {
                 </p>
 
                 <div className="mt-5 flex flex-col items-center gap-2">
-                  <div className="rounded-2xl bg-white p-3 shadow-elev-1">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={qrCode}
-                      alt="QR Code Pix para doação"
-                      className="h-40 w-40 rounded-lg"
-                    />
-                  </div>
-                  <p className="font-mono text-micro text-[#757994]">QR Code Pix real</p>
+                  {qrCode ? (
+                    <>
+                      <div className="rounded-2xl bg-white p-3 shadow-elev-1">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={qrCode}
+                          alt="QR Code Pix para doação"
+                          className="h-40 w-40 rounded-lg"
+                        />
+                      </div>
+                      <p className="font-mono text-micro text-[#757994]">QR Code Pix</p>
+                    </>
+                  ) : (
+                    <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 px-4 py-3 text-center text-body-s text-yellow-100">
+                      O QR Code não veio pronto, mas o código Pix abaixo pode ser copiado e pago normalmente.
+                    </div>
+                  )}
                   {formatExpiry(expiresAt) && (
                     <p className="text-micro text-[#757994]">
                       Válido até {formatExpiry(expiresAt)}
@@ -320,11 +341,18 @@ export function DonateSection() {
                   <p className="font-mono text-micro uppercase tracking-micro text-[#757994] mb-2">
                     Código copia-e-cola
                   </p>
-                  <p className="text-caption text-white/80 break-all select-all leading-relaxed">{pixCode}</p>
+                  {pixCode ? (
+                    <p className="text-caption text-white/80 break-all select-all leading-relaxed">{pixCode}</p>
+                  ) : (
+                    <p className="text-caption text-yellow-100 leading-relaxed">
+                      O código Pix não foi retornado corretamente por este ambiente. Tente novamente em instantes.
+                    </p>
+                  )}
                 </div>
 
                 <button
                   onClick={handleCopy}
+                  disabled={!pixCode}
                   className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-body-s text-white/80 hover:bg-white/5 transition-colors"
                 >
                   {copied ? <Check size={16} className="text-[#00D97E]" /> : <Copy size={16} />}
