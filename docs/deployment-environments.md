@@ -168,3 +168,83 @@ Current expected behavior:
 - secrets must arrive at runtime from Railway or Vercel
 
 If a future Docker change reintroduces `COPY .env*`, treat that as a security regression.
+
+## Confirmed Usage Audit
+
+This section reflects the variables confirmed by direct code inspection in the current repository state.
+Where a variable remains listed outside this section, treat it as operationally expected or compatibility-related,
+not necessarily confirmed as actively read in the current runtime path.
+
+### Confirmed: apps/web
+
+Confirmed in inspected web files:
+
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_DSN`
+- `NODE_ENV`
+- `VERCEL_ENV`
+- `NEXT_RUNTIME`
+
+Confirmed by inspected files:
+
+- [apps/web/instrumentation.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/web/instrumentation.ts:1)
+- [apps/web/instrumentation-client.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/web/instrumentation-client.ts:1)
+- [apps/web/sentry.server.config.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/web/sentry.server.config.ts:1)
+- [apps/web/sentry.edge.config.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/web/sentry.edge.config.ts:1)
+- [apps/web/src/app/api/v1/donate/route.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/web/src/app/api/v1/donate/route.ts:1)
+
+Important note:
+
+- `ABACATE_PAY_API_KEY` is present in `.env.example`, but the current inspected donation route is still a placeholder and does not read it yet.
+- `NEXT_PUBLIC_BASE_URL` is documented, but was not confirmed as actively used in the inspected files of this pass.
+
+### Confirmed: apps/worker
+
+Confirmed in inspected worker files:
+
+- `DATABASE_URL`
+- `REDIS_URL`
+- `ANTHROPIC_API_KEY`
+- `WHATSAPP_PROVIDER`
+- `PROMPTS_DIR`
+- `ZAPI_INSTANCE_ID`
+- `ZAPI_TOKEN`
+- `ZAPI_SECURITY_TOKEN`
+- `WHATSAPP_API_TOKEN`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_WEBHOOK_VERIFY_TOKEN`
+- `WHATSAPP_APP_SECRET`
+- `META_WHATSAPP_ACCESS_TOKEN`
+- `META_WHATSAPP_PHONE_NUMBER_ID`
+- `LLM_PROVIDER_PRIMARY`
+- `LLM_PROVIDER_FALLBACK`
+- `LLM_FALLBACK_ENABLED`
+- `LLM_DISABLED`
+- `USD_TO_BRL_CENTS`
+- `SENTRY_DSN`
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `NODE_ENV`
+
+Confirmed by inspected files:
+
+- [apps/worker/src/env.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/worker/src/env.ts:1)
+- [apps/worker/src/index.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/worker/src/index.ts:1)
+- [apps/worker/src/instrumentation.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/apps/worker/src/instrumentation.ts:1)
+- [packages/database/src/db.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/packages/database/src/db.ts:1)
+- [packages/whatsapp/src/index.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/packages/whatsapp/src/index.ts:1)
+- [packages/llm/src/client.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/packages/llm/src/client.ts:1)
+
+### Shared / Conditional
+
+These were confirmed in shared packages, but whether they are required by `web`, `worker`, or both depends on which runtime path imports them:
+
+- `JWT_SECRET`
+
+Confirmed by:
+
+- [packages/auth/src/index.ts](/Users/edu/Desktop/Pronto.IA/pronto.ia/packages/auth/src/index.ts:1)
+
+Operational rule:
+
+- Keep `JWT_SECRET` available to any service that signs or verifies auth tokens.
+- Do not expose it to the browser.
