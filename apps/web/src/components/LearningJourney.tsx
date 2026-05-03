@@ -1,4 +1,5 @@
 import { MessageCircle, Sparkles, TrendingUp, Star, Zap, Users } from 'lucide-react';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
 const STEPS = [
   {
@@ -119,7 +120,7 @@ export function LearningJourney() {
         {/* CTA Final */}
         <div className="text-center">
           <a
-            href="https://wa.me/5511999999999?text=Oi%20Maria%21"
+            href={createMariaWhatsAppUrl('Oi Maria!')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 bg-[#00D97E] text-[#0A0E1A] px-10 py-5 rounded-full font-semibold text-lg hover:scale-105 hover:shadow-xl hover:shadow-[#00D97E]/20 transition-all duration-300"

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { LogoLight } from './LogoLight';
+import { MARIA_WHATSAPP_BASE_URL } from '@/lib/whatsapp';
 
 export function Footer() {
   return (
@@ -25,7 +26,7 @@ export function Footer() {
             para empresas
           </a>
           <a
-            href="https://wa.me/5511999999999"
+            href={MARIA_WHATSAPP_BASE_URL}
             className="text-body-s text-[#9DA1B4] hover:text-white transition-colors"
           >
             WhatsApp

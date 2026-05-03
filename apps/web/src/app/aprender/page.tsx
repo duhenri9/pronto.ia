@@ -6,6 +6,7 @@ import {
 import Link from 'next/link';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
 const HERO_STATS = [
   { icon: Users, value: '1 milhão', label: 'de pessoas capacitadas até 2028' },
@@ -264,7 +265,9 @@ export default function AprenderPage() {
                       </div>
 
                       <Link
-                        href={`https://wa.me/5511999999999?text=Oi%20Maria%21%20Quero%20aprender%20${encodeURIComponent(course.title)}`}
+                        href={createMariaWhatsAppUrl(
+                          `Oi Maria! Quero aprender ${course.title}`,
+                        )}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full border ${c.border} ${c.text} text-sm font-medium hover:${c.bg} transition-colors`}
@@ -312,7 +315,7 @@ export default function AprenderPage() {
           A Maria está esperando você. É grátis, é rápido e o primeiro resultado já aparece hoje.
         </p>
         <a
-          href="https://wa.me/5511999999999?text=Oi%20Maria%21%20Quero%20começar"
+          href={createMariaWhatsAppUrl('Oi Maria! Quero começar')}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-3 bg-[#00D97E] text-[#0A0E1A] px-10 py-5 rounded-full font-semibold text-lg hover:scale-105 hover:shadow-xl hover:shadow-[#00D97E]/20 transition-all duration-300"

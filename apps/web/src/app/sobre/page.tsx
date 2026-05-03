@@ -2,6 +2,7 @@ import { Rocket, Globe, Users, Shield, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function SobrePage() {
   return (
@@ -106,7 +107,7 @@ export default function SobrePage() {
             <ArrowRight className="w-4 h-4" />
           </Link>
           <a
-            href="https://wa.me/5511999999999?text=Oi%20Maria%21"
+            href={createMariaWhatsAppUrl('Oi Maria!')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 bg-[#00D97E] text-[#0F1535] px-6 py-3 rounded-full font-semibold hover:scale-105 transition-transform"

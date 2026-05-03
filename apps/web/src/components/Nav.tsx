@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { LogoLight } from './LogoLight';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
-const WHATSAPP_URL =
-  'https://wa.me/5511999999999?text=Oi%20Maria!%20Quero%20começar';
+const WHATSAPP_URL = createMariaWhatsAppUrl('Oi Maria! Quero começar');
 
 export function Nav() {
   return (

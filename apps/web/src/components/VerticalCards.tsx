@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Scissors, UtensilsCrossed, Wrench, Laptop, Bell } from 'lucide-react';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
 type VerticalStatus = 'available' | 'in_development';
 
@@ -169,7 +170,9 @@ export function VerticalCards() {
                   </div>
                 ) : (
                   <a
-                    href={`https://wa.me/5511999999999?text=Oi%20Maria!%20Quero%20ser%20avisado%20quando%20o%20${encodeURIComponent(v.persona)}%20chegar`}
+                    href={createMariaWhatsAppUrl(
+                      `Oi Maria! Quero ser avisado quando o ${v.persona} chegar`,
+                    )}
                     className="inline-flex items-center gap-2 rounded-md border border-neutral-200 bg-white px-3 py-2.5 text-body-s font-medium text-neutral-600 transition-all hover:border-green-300 hover:text-green-700"
                   >
                     <Bell size={14} />

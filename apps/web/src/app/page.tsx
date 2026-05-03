@@ -7,9 +7,9 @@ import { OutcomeSection } from '@/components/OutcomeSection';
 import { DonateSection } from '@/components/DonateSection';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { createMariaWhatsAppUrl } from '@/lib/whatsapp';
 
-const WHATSAPP_URL =
-  'https://wa.me/5511999999999?text=Oi%20Maria!%20Quero%20começar';
+const WHATSAPP_URL = createMariaWhatsAppUrl('Oi Maria! Quero começar');
 
 export default function HomePage() {
   return (
