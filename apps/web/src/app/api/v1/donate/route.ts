@@ -1,77 +1,89 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const MIN_AMOUNT = 500; // R$ 5,00 em centavos
-const MAX_AMOUNT = 10000000; // R$ 100.000,00 em centavos
-const ABACATE_API_URL = 'https://api.abacatepay.com/v2/checkouts/create';
-const DONATION_PRODUCT_ID = 'prod_Y1N66L21WAeexcX6YTxdYea2';
+const MIN_AMOUNT = 500;
+const MAX_AMOUNT = 10000000;
+const ABACATE_API_URL = 'https://api.abacatepay.com/v2';
+const ABACATE_API_KEY = 'abc_prod_YAyHFKhfMstfFBgCB5rDMP14';
 
-interface AbacateCheckoutResponse {
-  data?: {
-    id: string;
-    url: string;
-    amount: number;
-    status: string;
-    createdAt?: string;
-    updatedAt?: string;
-  };
-  error?: string | null;
-  success?: boolean;
+const PRODUCT_MAP: Record<number, string> = {
+  500: 'prod_5eyIJJ3zZfb5Rhz1MfyZF120',
+  1000: 'prod_hUFq0TtK3FpjNNWn65zpmZY6',
+  2000: 'prod_u3utwEArCmMh4Ksy4Km56kcn',
+  5000: 'prod_TtNnRJy0CZHW hg6FNDnrWTNh',
+  10000: 'prod_uxuwaTDsN0prALt5XtjdHhnx',
+  20000: 'prod_KaxKucZLXkqUqzbB0ZTgTa5U',
+  50000: 'prod_gPUP2TqAepqCLJuReMesBdG0',
+  100000: 'prod_hDH2yE6EEDRcLcXHarLtJMHY',
+  250000: 'prod_xeHLnQ4kpZWpch0adsuhcJ0D',
+};
+
+const FALLBACK_PRODUCT_ID = 'prod_Y1N66L21WAeexcX6YTxdYea2';
+
+async function getOrCreateProduct(amount: number) {
+  if (PRODUCT_MAP[amount]) {
+    return { productId: PRODUCT_MAP[amount], quantity: 1 };
+  }
+
+  try {
+    const res = await fetch(`${ABACATE_API_URL}/products/create`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${ABACATE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: `Doacao Pronto IA - R$ ${(amount / 100).toFixed(2)}`,
+        price: amount,
+        quantity: 999,
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return { productId: data.id, quantity: 1 };
+    }
+  } catch {}
+
+  return { productId: FALLBACK_PRODUCT_ID, quantity: Math.round(amount / 100) };
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { amount } = body;
-    const apiKey = process.env.ABACATE_PAY_API_KEY ?? process.env.ABACATE_PAY_API;
+    const { amount } = await request.json();
 
-    // Validate amount
-    if (!amount || typeof amount !== 'number' || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
-      return NextResponse.json(
-        { error: `Valor deve ser entre R$ ${MIN_AMOUNT / 100} e R$ ${MAX_AMOUNT / 100}` },
-        { status: 400 },
-      );
+    if (!amount || typeof amount !== 'number') {
+      return NextResponse.json({ error: 'Valor invalido' }, { status: 400 });
     }
 
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Doa\u00e7\u00f5es ainda n\u00e3o est\u00e3o configuradas neste ambiente.' },
-        { status: 503 },
-      );
+    const roundedAmount = Math.round(amount);
+    if (roundedAmount < MIN_AMOUNT || roundedAmount > MAX_AMOUNT) {
+      return NextResponse.json({ error: 'Valor fora do limite' }, { status: 400 });
     }
 
-    const quantity = Math.round(amount / 100);
+    const { productId, quantity } = await getOrCreateProduct(roundedAmount);
 
-    const upstream = await fetch(ABACATE_API_URL, {
+    const checkoutRes = await fetch(`${ABACATE_API_URL}/checkouts/create`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        'Authorization': `Bearer ${ABACATE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        items: [{ id: DONATION_PRODUCT_ID, quantity }],
-        methods: ['PIX'],
+        products: [{ product_id: productId, quantity }],
+        customer: { name: 'Doador Pronto IA' },
+        success_url: 'https://pronto.ia',
       }),
-      cache: 'no-store',
     });
 
-    const data = (await upstream.json()) as AbacateCheckoutResponse;
-
-    if (!upstream.ok || !data.success || !data.data?.url) {
-      return NextResponse.json(
-        { error: data.error ?? 'N\u00e3o foi poss\u00edvel gerar o checkout agora.' },
-        { status: upstream.status || 502 },
-      );
+    if (!checkoutRes.ok) {
+      const errText = await checkoutRes.text();
+      console.error('AbacatePay checkout error:', errText);
+      return NextResponse.json({ error: 'Erro ao criar checkout' }, { status: 500 });
     }
 
-    return NextResponse.json({
-      checkoutId: data.data.id,
-      checkoutUrl: data.data.url,
-      amount: data.data.amount,
-    });
-  } catch {
-    return NextResponse.json(
-      { error: 'Erro interno. Tente novamente.' },
-      { status: 500 },
-    );
+    const checkoutData = await checkoutRes.json();
+    return NextResponse.json({ checkoutUrl: checkoutData.checkoutUrl });
+  } catch (error) {
+    console.error('Donate API error:', error);
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }
