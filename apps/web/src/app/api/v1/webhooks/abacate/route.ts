@@ -11,10 +11,12 @@ import { getRedisConnection } from '@/lib/redis';
 
 export const dynamic = 'force-dynamic';
 
-let abacateQueue: Queue | null = null;
-function getAbacateQueue(): Queue {
+import type { AbacateWebhookJob, AbacateWebhookEvent } from '@pronto-ia/types';
+
+let abacateQueue: Queue<AbacateWebhookJob> | null = null;
+function getAbacateQueue(): Queue<AbacateWebhookJob> {
   if (!abacateQueue) {
-    abacateQueue = new Queue('whatsapp.outbound', {
+    abacateQueue = new Queue('payments.webhooks', {
       connection: getRedisConnection(),
     });
   }
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
   const bodyText = await request.text();
 
   // 2. Parse JSON
-  let payload: unknown;
+  let payload: AbacateWebhookEvent;
   try {
     payload = JSON.parse(bodyText);
   } catch {

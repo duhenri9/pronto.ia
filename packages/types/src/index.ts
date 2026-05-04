@@ -164,8 +164,17 @@ export const LGPD_CONSENT_VERSION = '1.0.0';
 
 
 // ---- AbacatePay Webhooks ----
+export interface AbacateWebhookEvent {
+  id: string;
+  type: string;
+  checkout_id: string;
+  subscription_id?: string;
+  amount?: number;
+}
+
 export interface AbacateWebhookJob {
+  type: 'abacate_webhook';
   rawBody: string;
   signature: string;
-  payload: Record<string, unknown>;
+  payload: AbacateWebhookEvent;
 }
