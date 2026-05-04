@@ -32,14 +32,18 @@ async function getOrCreateProduct(amount: number) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        externalId: `doacao-${amount}`,
         name: `Doacao Pronto IA - R$ ${(amount / 100).toFixed(2)}`,
         price: amount,
         quantity: 999,
+        currency: 'BRL',
       }),
     });
     if (res.ok) {
       const data = await res.json();
-      return { productId: data.id, quantity: 1 };
+      if (data.data && data.data.id) {
+        return { productId: data.data.id, quantity: 1 };
+      }
     }
   } catch {}
 
