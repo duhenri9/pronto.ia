@@ -59,12 +59,14 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount,
-          expiresIn: 3600,
-          description: 'Doação para o projeto Pronto.IA',
-          metadata: {
-            source: 'pronto-ia-web',
-            kind: 'donation',
+          data: {
+            amount,
+            expiresIn: 3600,
+            description: 'Doação para o projeto Pronto.IA',
+            metadata: {
+              source: 'pronto-ia-web',
+              kind: 'donation',
+            },
           },
         }),
         cache: 'no-store',
