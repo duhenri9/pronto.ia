@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        products: [{ product_id: productId, quantity }],
+        items: [{ id: productId, quantity }],
         customer: { name: 'Doador Pronto IA' },
         success_url: 'https://pronto.ia',
       }),
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     }
 
     const checkoutData = await checkoutRes.json();
-    return NextResponse.json({ checkoutUrl: checkoutData.checkoutUrl });
+    return NextResponse.json({ checkoutUrl: checkoutData.data.url });
   } catch (error) {
     console.error('Donate API error:', error);
     return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
